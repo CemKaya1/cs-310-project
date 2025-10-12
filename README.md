@@ -1,6 +1,6 @@
 # cs_310_project - Outfitly
 
-OUTLIFY
+OUTFITLY
 
 ## Short Description
 A smart wardrobe assistant that allows users to digitize their clothing, create stylish outfits, receive personalized outfit suggestions, and share their style with friends.
