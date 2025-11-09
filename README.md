@@ -1,16 +1,16 @@
-# cs_310_project
+# cs_310_project - Outfitly
 
-A new Flutter project.
+OUTFITLY
 
-## Getting Started
+## Short Description
+A smart wardrobe assistant that allows users to digitize their clothing, create stylish outfits, receive personalized outfit suggestions, and share their style with friends.
 
-This project is a starting point for a Flutter application.
+## Main Purpose
+Outfitly addresses the timeless problem of "I have a closet full of clothes, but nothing to wear." It solves this by creating a searchable, digital inventory of a user's entire wardrobe, preventing items from being forgotten. By offering a tool to create and save outfits, it reduces the daily stress and time spent on deciding what to wear. Furthermore, its suggestion engine provides inspiration and helps users maximize the potential of their existing clothes, promoting more sustainable fashion habits.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### Group Members
+- **Ali Yılmaz** – 32281               (Project Coordinator)
+- **Zeynep Okkıran** – 32304           (Testing & Quality Assurance Lead )
+- **Nurgül Kardelen Kömürcü** – 32289  (Integration & Repository Lead )
+- **Cem Kaya** – 31957                 (Documentation & Submission Lead )
+- **Mete Yılmazbaş** – 34349           (Presentation & Communication Lead)
