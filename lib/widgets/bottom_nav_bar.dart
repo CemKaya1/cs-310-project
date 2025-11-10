@@ -2,22 +2,21 @@ import 'package:flutter/material.dart';
 
 class OutfitlyBottomNavBar extends StatelessWidget {
   final int currentIndex;
-  const OutfitlyBottomNavBar({super.key, required this.currentIndex});
+  final Function(int) onTap;
+  const OutfitlyBottomNavBar({super.key, required this.currentIndex,required this.onTap,});
 
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
+      showUnselectedLabels: true,
       currentIndex: currentIndex,
       selectedItemColor: Colors.deepPurple,
       unselectedItemColor: Colors.grey,
-      onTap: (index) {
-        if (index == 0) Navigator.pushNamed(context, "/home");
-        if (index == 1) Navigator.pushNamed(context, "/my_closet");
-        if (index == 2) Navigator.pushNamed(context, "/planner");
-      },
+      onTap: onTap,
       items: const [
-        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home"),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: "Home",),
         BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: "My Closet"),
+        BottomNavigationBarItem(icon: Icon(Icons.palette), label: "My Outfits"),
         BottomNavigationBarItem(icon: Icon(Icons.calendar_month), label: "Planner"),
       ],
     );

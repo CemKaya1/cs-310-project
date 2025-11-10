@@ -1,26 +1,27 @@
 import 'package:cs_310_project/models/item_model.dart';
 
 class MockItems {
-  static final List<Item> list = [
-    Item(
+
+  static final List<ClosetItemModel> list = [
+    ClosetItemModel(
       name: "Black T-Shirt",
       category: "Top",
       color: "Black",
       imagePath: "lib/core/mock/mock_images/black_tshirt.jpg",
     ),
-    Item(
+    ClosetItemModel(
       name: "Blue T-Shirt",
       category: "Top",
       color: "Blue",
       imagePath: "lib/core/mock/mock_images/blue_tshirt.jpg",
     ),
-    Item(
+    ClosetItemModel(
       name: "Black Jeans",
       category: "Bottom",
       color: "Black",
       imagePath: "lib/core/mock/mock_images/black_jean.jpg",
     ),
-    Item(
+    ClosetItemModel(
       name: "Blue Jeans",
       category: "Bottom",
       color: "Blue",

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
-import 'package:cs_310_project/widgets/bottom_nav_bar.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -162,7 +161,6 @@ class _PlannerPageState extends State<PlannerPage> {
         ),
       ),
 
-      bottomNavigationBar: const OutfitlyBottomNavBar(currentIndex: 2),
     );
   }
 

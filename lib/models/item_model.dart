@@ -1,10 +1,10 @@
-class Item {
+class ClosetItemModel {
   final String name;
   final String category;
   final String color;
   final String imagePath; // asset path
 
-  Item({
+  ClosetItemModel({
     required this.name,
     required this.category,
     required this.color,
