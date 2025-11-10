@@ -7,7 +7,7 @@ class OutfitDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final outfit = mockOutfits.first; // mock data
+    final outfit = MockOutfits.list.first; // mock data
 
     return Scaffold(
       appBar: AppBar(
@@ -47,10 +47,11 @@ class OutfitDetailPage extends StatelessWidget {
               child: ListView.builder(
                 itemCount: outfit.items.length,
                 itemBuilder: (context, index) {
+                  final item = outfit.items[index];
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
-                      title: Text(outfit.items[index]),
+                      title: Text(item.name),
                       trailing: const Icon(Icons.check_circle_outline),
                     ),
                   );

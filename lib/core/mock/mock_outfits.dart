@@ -1,16 +1,23 @@
 import 'package:cs_310_project/models/outfit_model.dart';
+import 'package:cs_310_project/core/mock/mock_items.dart';
 
-final mockOutfits = [
-  Outfit(
-    name: "Winter Casual",
-    items: ["Jacket", "Sweater", "Jeans", "Boots"],
-    imageUrl:
-    "https://images.unsplash.com/photo-1618354691676-6e2c3a165b09?w=400",
-  ),
-  Outfit(
-    name: "Summer Breeze",
-    items: ["T-shirt", "Shorts", "Sneakers"],
-    imageUrl:
-    "https://images.unsplash.com/photo-1520975918318-3eec1c0f9383?w=400",
-  ),
-];
+class MockOutfits {
+  static final List<Outfit> list = [
+    Outfit(
+      name: "Casual Blue",
+      items: [
+        MockItems.list[1], // Blue T-Shirt
+        MockItems.list[3], // Blue Jeans
+      ],
+      imagePath: "lib/core/mock/mock_images/blue_tshirt.jpg",
+    ),
+    Outfit(
+      name: "Street Black",
+      items: [
+        MockItems.list[0], // Black T-Shirt
+        MockItems.list[2], // Black Jeans
+      ],
+      imagePath: "lib/core/mock/mock_images/black_tshirt.jpg",
+    ),
+  ];
+}
