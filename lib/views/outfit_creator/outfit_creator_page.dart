@@ -1,9 +1,10 @@
-// lib/views/outfit_creator/outfit_creator_page.dart
 import 'package:flutter/material.dart';
 import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_items.dart';
+import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/item_model.dart';
+import 'package:cs_310_project/models/outfit_model.dart';
 
 class OutfitCreatorPage extends StatefulWidget {
   const OutfitCreatorPage({super.key});
@@ -18,14 +19,14 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   // Satırlarda seçilenleri tutmak için benzersiz anahtarlar
   final Set<String> _selectedKeys = {};
 
-  // İstediğimiz sırayla 4 item (görseldeki gibi)
+  // Görseldeki sırayla 4 item
   late final List<ClosetItemModel> _rows = _resolveRows();
 
   List<ClosetItemModel> _resolveRows() {
     ClosetItemModel pickByName(String name, {String? fallbackCategory}) {
-      // İsimle bul, yoksa kategorinin ilk uygun öğesini getir
       final list = MockItems.list;
-      final byName = list.where((e) => e.name.toLowerCase() == name.toLowerCase());
+      final byName =
+      list.where((e) => e.name.toLowerCase() == name.toLowerCase());
       if (byName.isNotEmpty) return byName.first;
       if (fallbackCategory == null) return list.first;
       final byCat = list.where((e) => e.category == fallbackCategory);
@@ -40,7 +41,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     ];
   }
 
-  String _keyOf(ClosetItemModel it) => it.imagePath; // benzersiz anahtar
+  String _keyOf(ClosetItemModel it) => it.imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +58,46 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
         elevation: 0,
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
+
+      // ✅ Alt kısımda sabit Cancel / Save
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    side: BorderSide(color: Colors.grey.shade400),
+                    foregroundColor: AppColors.textDark,
+                    textStyle: AppTextStyles.button,
+                  ),
+                  onPressed: () => Navigator.pop(context, false),
+                  child: const Text('Cancel'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: FilledButton(
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: AppColors.textDark,
+                    foregroundColor: Colors.white,
+                    textStyle: AppTextStyles.button,
+                  ),
+                  onPressed: _onSave,
+                  child: const Text('Save'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
           // Upload Image kutusu
           Container(
@@ -72,7 +111,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.photo_camera_outlined, size: 32, color: AppColors.textDark),
+                  Icon(Icons.photo_camera_outlined,
+                      size: 32, color: AppColors.textDark),
                   const SizedBox(height: 8),
                   Text('Upload Image', style: AppTextStyles.subtitle),
                 ],
@@ -86,8 +126,10 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
             controller: _nameCtrl,
             decoration: InputDecoration(
               hintText: 'Outfit Name',
-              hintStyle: AppTextStyles.subtitle.copyWith(color: Colors.grey.shade500),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              hintStyle:
+              AppTextStyles.subtitle.copyWith(color: Colors.grey.shade500),
+              contentPadding:
+              const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: Colors.grey.shade300),
@@ -125,50 +167,46 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                     },
                   ),
                   if (i != _rows.length - 1)
-                    Divider(height: 1, thickness: 1, color: Colors.grey.shade200),
+                    Divider(
+                        height: 1,
+                        thickness: 1,
+                        color: Colors.grey.shade200),
                 ],
               ],
             ),
           ),
 
-          const SizedBox(height: 16),
-
-          // Cancel / Save
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: Colors.grey.shade400),
-                    foregroundColor: AppColors.textDark,
-                    textStyle: AppTextStyles.button,
-                  ),
-                  onPressed: () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton(
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: AppColors.textDark,
-                    foregroundColor: Colors.white,
-                    textStyle: AppTextStyles.button,
-                  ),
-                  onPressed: () {
-                    // İstersen burada seçilenleri/ismi kaydetme logic’i ekleyebilirsin.
-                    Navigator.pop(context, true);
-                  },
-                  child: const Text('Save'),
-                ),
-              ),
-            ],
-          ),
+          // Altta butonlar var; burada ekstra boşluk bırakmayalım
+          const SizedBox(height: 8),
         ],
       ),
     );
+  }
+
+  void _onSave() {
+    // Seçilenleri oluştur
+    final selected =
+    _rows.where((it) => _selectedKeys.contains(_keyOf(it))).toList();
+
+    if (selected.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select at least one item')),
+      );
+      return;
+    }
+
+    final name =
+    _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
+
+    // MockOutfits’e ekle → MyOutfits listesinde görünsün
+    final outfit = Outfit(
+      name: name,
+      items: selected,
+      imagePath: selected.first.imagePath, // öne çıkacak görsel
+    );
+    MockOutfits.list.insert(0, outfit);
+
+    Navigator.pop(context, true); // MyOutfitPage, setState() ile tazeler
   }
 }
 
@@ -186,10 +224,12 @@ class _ItemRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      contentPadding:
+      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.asset(item.imagePath, width: 46, height: 46, fit: BoxFit.cover),
+        child: Image.asset(item.imagePath,
+            width: 46, height: 46, fit: BoxFit.cover),
       ),
       title: Text(item.name, style: AppTextStyles.title),
       trailing: InkWell(
