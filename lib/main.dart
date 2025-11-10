@@ -7,6 +7,8 @@ import 'package:cs_310_project/views/my_closet/my_closet_page.dart';
 import 'package:cs_310_project/views/item_detail/item_detail_page.dart';
 import 'package:cs_310_project/views/planner/planner_page.dart';
 import 'package:cs_310_project/views/outfit_detail/outfit_detail_page.dart';
+import 'package:cs_310_project/views/outfit_creator/outfit_creator_page.dart';
+
 
 void main() {
   runApp(const OutfitlyApp());
@@ -52,6 +54,8 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
         "/planner": (context) => const PlannerPage(),
         "/outfit_detail": (context) => const OutfitDetailPage(),
         "/my_outfits": (context) => const MyOutfitPage(),
+        "/outfit_creator": (context) => const OutfitCreatorPage(),
+
       },
       home: Scaffold(bottomNavigationBar: OutfitlyBottomNavBar(currentIndex: _selectedIndex,
         onTap: _onItemTapped,),
