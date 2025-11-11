@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
+import 'package:cs_310_project/widgets/outfit_item.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -11,7 +12,7 @@ class PlannerPage extends StatefulWidget {
 }
 
 class _PlannerPageState extends State<PlannerPage> {
-  final List<Outfit?> assignedOutfits = List.filled(28, null); // ✅ outfit nesneleri
+  final List<Outfit?> assignedOutfits = List.filled(28, null);
 
   @override
   Widget build(BuildContext context) {
@@ -23,183 +24,97 @@ class _PlannerPageState extends State<PlannerPage> {
         title: const Text("Planner"),
         centerTitle: true,
       ),
-
-      // === Ana body ===
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        child: ListView(
-          children: [
-            // === Takvim başlık satırı ===
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: days
-                  .map(
-                    (d) => Expanded(
-                  child: Center(
-                    child: Text(
-                      d,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // === Gün başlıkları ===
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: days
+                    .map(
+                      (d) => Expanded(
+                    child: Center(
+                      child: Text(
+                        d,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              )
-                  .toList(),
-            ),
-            const SizedBox(height: 8),
-
-            // === Takvim 4x7 kare ===
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 7,
-                mainAxisSpacing: 6,
-                crossAxisSpacing: 6,
+                )
+                    .toList(),
               ),
-              itemCount: 28,
-              itemBuilder: (context, index) {
-                final assigned = assignedOutfits[index];
-                return GestureDetector(
-                  onTap: () {
-                    // Tekrar tıklanınca kaldır
-                    setState(() {
-                      assignedOutfits[index] = null;
-                    });
-                  },
-                  child: DragTarget<Outfit>(
-                    onAccept: (outfit) {
-                      setState(() {
-                        assignedOutfits[index] = outfit;
-                      });
+              const SizedBox(height: 8),
+
+              // === Takvim 4x7 ===
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 7,
+                  mainAxisSpacing: 6,
+                  crossAxisSpacing: 6,
+                ),
+                itemCount: 28,
+                itemBuilder: (context, index) {
+                  final outfit = assignedOutfits[index];
+                  return DragTarget<Outfit>(
+                    onAccept: (dropped) {
+                      setState(() => assignedOutfits[index] = dropped);
                     },
                     builder: (context, candidateData, rejectedData) {
-                      return Container(
-                        decoration: BoxDecoration(
-                          color: candidateData.isNotEmpty
-                              ? Colors.deepPurple.shade50
-                              : Colors.white,
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Center(
-                          child: assigned == null
-                              ? const Text(
-                            "",
-                            style: TextStyle(fontSize: 12),
-                          )
-                              : Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.asset(
-                                  assigned.imagePath,
-                                  width: 35,
-                                  height: 35,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                assigned.name,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(fontSize: 10),
-                              ),
-                            ],
+                      return GestureDetector(
+                        onTap: () => setState(() {
+                          assignedOutfits[index] = null; // boşalt
+                        }),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: candidateData.isNotEmpty
+                                ? Colors.deepPurple.shade50
+                                : Colors.white,
+                            border:
+                            Border.all(color: Colors.grey.shade300, width: 1),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: outfit == null
+                              ? const SizedBox.shrink()
+                              : OutfitItem(
+                            outfit: outfit,
+                            compact: true,
                           ),
                         ),
                       );
                     },
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-            Text("Saved Outfits", style: AppTextStyles.title),
-            const SizedBox(height: 8),
-
-            // === Saved Outfits listesi ===
-            SizedBox(
-              height: 300,
-              child: ListView.builder(
-                itemCount: MockOutfits.list.length,
-                itemBuilder: (context, index) {
-                  final outfit = MockOutfits.list[index];
-                  return Draggable<Outfit>(
-                    data: outfit,
-                    feedback: SizedBox(
-                      width: 150,
-                      child: Material(
-                        color: Colors.transparent,
-                        child: _buildOutfitCard(
-                          outfit.name,
-                          imagePath: outfit.imagePath,
-                          dragging: true,
-                        ),
-                      ),
-                    ),
-                    childWhenDragging: Opacity(
-                      opacity: 0.4,
-                      child: _buildOutfitCard(
-                        outfit.name,
-                        imagePath: outfit.imagePath,
-                      ),
-                    ),
-                    child: _buildOutfitCard(
-                      outfit.name,
-                      imagePath: outfit.imagePath,
-                    ),
                   );
                 },
               ),
-            ),
-          ],
-        ),
-      ),
 
-    );
-  }
+              const SizedBox(height: 20),
+              Text("Saved Outfits", style: AppTextStyles.title),
+              const SizedBox(height: 8),
 
-  // === Outfit Kartı (Saved Outfits'te kullanılan) ===
-  Widget _buildOutfitCard(
-      String name, {
-        String? imagePath,
-        bool dragging = false,
-        double opacity = 1,
-      }) {
-    return Opacity(
-      opacity: opacity,
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: dragging ? Colors.deepPurple.shade100 : Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black12,
-              blurRadius: 3,
-              offset: Offset(0, 2),
-            ),
-          ],
-        ),
-        child: ListTile(
-          leading: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: imagePath != null
-                ? Image.asset(
-              imagePath,
-              width: 50,
-              height: 50,
-              fit: BoxFit.cover,
-            )
-                : const Icon(Icons.image, size: 40, color: Colors.grey),
+              // === Saved Outfits (draggable) ===
+              SizedBox(
+                height: 300,
+                child: ListView.builder(
+                  itemCount: MockOutfits.list.length,
+                  itemBuilder: (context, index) {
+                    final outfit = MockOutfits.list[index];
+                    return OutfitItem(
+                      outfit: outfit,
+                      draggable: true,
+                      compact: true,
+                    );
+                  },
+                ),
+              ),
+            ],
           ),
-          title: Text(name, style: const TextStyle(fontSize: 16)),
         ),
       ),
     );

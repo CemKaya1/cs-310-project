@@ -1,76 +1,125 @@
 import 'package:flutter/material.dart';
+import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
+import 'package:cs_310_project/models/outfit_model.dart';
+import 'package:cs_310_project/widgets/outfit_item.dart';
+import 'package:cs_310_project/widgets/closet_item.dart';
 
-class OutfitDetailPage extends StatelessWidget {
+class OutfitDetailPage extends StatefulWidget {
   const OutfitDetailPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final outfit = MockOutfits.list.first; // mock data
+  State<OutfitDetailPage> createState() => _OutfitDetailPageState();
+}
 
+class _OutfitDetailPageState extends State<OutfitDetailPage> {
+  bool isEditing = false;
+  late Outfit outfit;
+  late TextEditingController _nameCtrl;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    outfit = (ModalRoute.of(context)?.settings.arguments as Outfit?) ??
+        MockOutfits.list.first;
+    _nameCtrl = TextEditingController(text: outfit.name);
+  }
+
+  void _saveChanges() {
+    final newName = _nameCtrl.text.trim();
+    if (newName.isNotEmpty) {
+      setState(() => outfit.name = newName);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Outfit name updated")),
+      );
+    }
+    setState(() => isEditing = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          // MyOutfits rotasına geri dön
-          onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              "/my_outfits",
-                  (route) => false,
-            );
-          },
+          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text("Outfit Detail"),
+        title: Text(outfit.name, style: AppTextStyles.title),
+        centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 0,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(
-              child: Container(
-                height: 200,
-                width: 200,
-                decoration: BoxDecoration(
-                  color: Colors.grey[200],
-                  borderRadius: BorderRadius.circular(12),
+            Center(child: OutfitItem(outfit: outfit)),
+
+            const SizedBox(height: 16),
+
+            // === Name edit alanı ===
+            if (isEditing)
+              TextField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: "Outfit Name",
+                  border: OutlineInputBorder(),
                 ),
-                child: const Icon(Icons.image, size: 100, color: Colors.grey),
+              )
+            else
+              Center(
+                child: Text(
+                  outfit.name,
+                  style: AppTextStyles.title.copyWith(fontSize: 22),
+                ),
               ),
-            ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 16),
             Text("Included Items", style: AppTextStyles.title),
             const SizedBox(height: 10),
+
+            // === Item listesi ===
             Expanded(
               child: ListView.builder(
                 itemCount: outfit.items.length,
                 itemBuilder: (context, index) {
                   final item = outfit.items[index];
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    child: ListTile(
-                      title: Text(item.name),
-                      trailing: const Icon(Icons.check_circle_outline),
-                    ),
+                  return ClosetItem(
+                    imagePath: item.imagePath,
+                    name: item.name,
                   );
                 },
               ),
             ),
-            const SizedBox(height: 20),
+
+            const SizedBox(height: 12),
+
+            // === Edit / Delete ===
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                ElevatedButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(Icons.edit),
-                  label: const Text("Edit"),
+                OutlinedButton.icon(
+                  onPressed: isEditing ? _saveChanges : () => setState(() => isEditing = true),
+                  icon: Icon(
+                    isEditing ? Icons.save : Icons.edit,
+                    color: AppColors.textDark,
+                  ),
+                  label: Text(
+                    isEditing ? "Save" : "Edit",
+                    style: const TextStyle(color: AppColors.textDark),
+                  ),
                 ),
-                ElevatedButton.icon(
-                  style:
-                  ElevatedButton.styleFrom(backgroundColor: Colors.redAccent),
-                  onPressed: () {},
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+                  onPressed: () {
+                    MockOutfits.list.remove(outfit);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("${outfit.name} deleted")),
+                    );
+                    Navigator.pop(context, true);
+                  },
                   icon: const Icon(Icons.delete),
                   label: const Text("Delete"),
                 ),

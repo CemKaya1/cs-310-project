@@ -1,9 +1,9 @@
 import 'package:cs_310_project/models/item_model.dart';
 
 class Outfit {
-  final String name;
-  final List<ClosetItemModel> items;
-  final String imagePath; // asset image of outfit preview
+  String name;
+  List<ClosetItemModel> items;
+  String imagePath;
 
   Outfit({
     required this.name,
