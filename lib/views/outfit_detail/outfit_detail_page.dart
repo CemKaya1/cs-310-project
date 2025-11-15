@@ -3,8 +3,8 @@ import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
-import 'package:cs_310_project/widgets/outfit_item.dart';
 import 'package:cs_310_project/widgets/closet_item.dart';
+import 'package:cs_310_project/widgets/outfit_item.dart';
 
 class OutfitDetailPage extends StatefulWidget {
   const OutfitDetailPage({super.key});
@@ -23,17 +23,20 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
     super.didChangeDependencies();
     outfit = (ModalRoute.of(context)?.settings.arguments as Outfit?) ??
         MockOutfits.list.first;
+
     _nameCtrl = TextEditingController(text: outfit.name);
   }
 
   void _saveChanges() {
     final newName = _nameCtrl.text.trim();
+
     if (newName.isNotEmpty) {
       setState(() => outfit.name = newName);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Outfit name updated")),
+        const SnackBar(content: Text("Outfit updated")),
       );
     }
+
     setState(() => isEditing = false);
   }
 
@@ -50,6 +53,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
         backgroundColor: Colors.white,
         elevation: 0,
       ),
+
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -59,7 +63,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
             const SizedBox(height: 16),
 
-            // === Name edit alanı ===
+            // === NAME EDITING ===
             if (isEditing)
               TextField(
                 controller: _nameCtrl,
@@ -77,18 +81,52 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
               ),
 
             const SizedBox(height: 16),
+
             Text("Included Items", style: AppTextStyles.title),
             const SizedBox(height: 10),
 
-            // === Item listesi ===
+            // === ITEM LIST ===
             Expanded(
               child: ListView.builder(
                 itemCount: outfit.items.length,
                 itemBuilder: (context, index) {
                   final item = outfit.items[index];
-                  return ClosetItem(
-                    imagePath: item.imagePath,
-                    name: item.name,
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    child: Stack(
+                      children: [
+                        SizedBox(
+                          width: double.infinity,
+                          child: ClosetItem(
+                            imagePath: item.imagePath,
+                            name: item.name,
+                          ),
+                        ),
+
+                        if (isEditing)
+                          Positioned(
+                            right: 8,
+                            top: 8,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  outfit.items.removeAt(index);
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: const BoxDecoration(
+                                  color: Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.close,
+                                    color: Colors.white, size: 18),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   );
                 },
               ),
@@ -96,12 +134,14 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
             const SizedBox(height: 12),
 
-            // === Edit / Delete ===
+            // === BUTTONS ===
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 OutlinedButton.icon(
-                  onPressed: isEditing ? _saveChanges : () => setState(() => isEditing = true),
+                  onPressed: isEditing
+                      ? _saveChanges
+                      : () => setState(() => isEditing = true),
                   icon: Icon(
                     isEditing ? Icons.save : Icons.edit,
                     color: AppColors.textDark,
@@ -111,8 +151,10 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     style: const TextStyle(color: AppColors.textDark),
                   ),
                 ),
+
                 FilledButton.icon(
-                  style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+                  style:
+                  FilledButton.styleFrom(backgroundColor: Colors.redAccent),
                   onPressed: () {
                     MockOutfits.list.remove(outfit);
                     ScaffoldMessenger.of(context).showSnackBar(

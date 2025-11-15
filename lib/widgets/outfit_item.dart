@@ -18,18 +18,53 @@ class OutfitItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.sizeOf(context);
-    final double screenWidth = screenSize.width;
-    final double screenHeight = screenSize.height;
+    if (draggable) {
+      return Draggable<Outfit>(
+        data: outfit,
+        feedback: Material(
+          color: Colors.transparent,
+          child: _buildContent(context),
+        ),
+        childWhenDragging: Opacity(
+          opacity: 0.35,
+          child: _buildContent(context),
+        ),
+        child: GestureDetector(onTap: onTap, child: _buildContent(context)),
+      );
+    }
 
-    // --- İçerik tasarımı (ClosetItem tarzı) ---
-    final card = Container(
-      width: screenWidth / 1.1,
-      height: screenHeight / 8.5,
+    return GestureDetector(onTap: onTap, child: _buildContent(context));
+  }
+
+  // ============================================================
+  //   ANA WİDGET – COMPACT ve NORMAL mod
+  // ============================================================
+  Widget _buildContent(BuildContext context) {
+    if (compact) {
+      return Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        clipBehavior: Clip.hardEdge,
+        child: Image.asset(
+          outfit.imagePath,
+          fit: BoxFit.cover,
+        ),
+      );
+    }
+
+    final Size size = MediaQuery.sizeOf(context);
+
+    return Container(
+      width: size.width / 1.1,
+      height: size.height / 8.5,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(width: 0.8, color: Colors.grey.shade400),
-        borderRadius: const BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: const [
           BoxShadow(
             color: Colors.black12,
@@ -41,48 +76,30 @@ class OutfitItem extends StatelessWidget {
       child: Row(
         children: [
           Padding(
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
               child: Image.asset(
                 outfit.imagePath,
-                width: screenWidth / 4,
+                width: size.width / 4,
                 height: double.infinity,
                 fit: BoxFit.cover,
               ),
             ),
           ),
           Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-              child: Text(
-                outfit.name,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
-                ),
-                overflow: TextOverflow.ellipsis,
+            child: Text(
+              outfit.name,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textDark,
               ),
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
+          )
         ],
       ),
     );
-
-    // --- Sürüklenebilir mod (Planner için) ---
-    if (draggable) {
-      return Draggable<Outfit>(
-        data: outfit,
-        feedback: Material(
-          color: Colors.transparent,
-          child: SizedBox(width: screenWidth / 1.1, child: card),
-        ),
-        childWhenDragging: Opacity(opacity: 0.4, child: card),
-        child: GestureDetector(onTap: onTap, child: card),
-      );
-    }
-
-    return GestureDetector(onTap: onTap, child: card);
   }
 }

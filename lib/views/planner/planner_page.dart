@@ -12,7 +12,8 @@ class PlannerPage extends StatefulWidget {
 }
 
 class _PlannerPageState extends State<PlannerPage> {
-  final List<Outfit?> assignedOutfits = List.filled(28, null);
+  // STATIC — sayfa değişince kaybolmaz
+  static List<Outfit?> assignedOutfits = List.filled(28, null);
 
   @override
   Widget build(BuildContext context) {
@@ -24,13 +25,14 @@ class _PlannerPageState extends State<PlannerPage> {
         title: const Text("Planner"),
         centerTitle: true,
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // === Gün başlıkları ===
+              // === GÜN BAŞLIKLARI ===
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: days
@@ -49,13 +51,15 @@ class _PlannerPageState extends State<PlannerPage> {
                 )
                     .toList(),
               ),
+
               const SizedBox(height: 8),
 
-              // === Takvim 4x7 ===
+              // === 4x7 GRID ===
               GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                gridDelegate:
+                const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 7,
                   mainAxisSpacing: 6,
                   crossAxisSpacing: 6,
@@ -63,24 +67,29 @@ class _PlannerPageState extends State<PlannerPage> {
                 itemCount: 28,
                 itemBuilder: (context, index) {
                   final outfit = assignedOutfits[index];
+
                   return DragTarget<Outfit>(
-                    onAccept: (dropped) {
-                      setState(() => assignedOutfits[index] = dropped);
+                    onAccept: (value) {
+                      setState(() {
+                        assignedOutfits[index] = value;
+                      });
                     },
-                    builder: (context, candidateData, rejectedData) {
+                    builder: (context, candidate, rejected) {
                       return GestureDetector(
-                        onTap: () => setState(() {
-                          assignedOutfits[index] = null; // boşalt
-                        }),
+                        onTap: () {
+                          setState(() => assignedOutfits[index] = null);
+                        },
                         child: Container(
                           decoration: BoxDecoration(
-                            color: candidateData.isNotEmpty
+                            color: candidate.isNotEmpty
                                 ? Colors.deepPurple.shade50
                                 : Colors.white,
-                            border:
-                            Border.all(color: Colors.grey.shade300, width: 1),
+                            border: Border.all(
+                              color: Colors.grey.shade300,
+                            ),
                             borderRadius: BorderRadius.circular(10),
                           ),
+                          padding: const EdgeInsets.all(3),
                           child: outfit == null
                               ? const SizedBox.shrink()
                               : OutfitItem(
@@ -96,19 +105,23 @@ class _PlannerPageState extends State<PlannerPage> {
 
               const SizedBox(height: 20),
               Text("Saved Outfits", style: AppTextStyles.title),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // === Saved Outfits (draggable) ===
+              // === DRAGGABLE OUTFIT LIST ===
               SizedBox(
                 height: 300,
                 child: ListView.builder(
                   itemCount: MockOutfits.list.length,
                   itemBuilder: (context, index) {
                     final outfit = MockOutfits.list[index];
-                    return OutfitItem(
-                      outfit: outfit,
-                      draggable: true,
-                      compact: true,
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: OutfitItem(
+                        outfit: outfit,
+                        draggable: true,
+                        compact: false,
+                      ),
                     );
                   },
                 ),
