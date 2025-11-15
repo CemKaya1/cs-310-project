@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_items.dart';
@@ -18,6 +21,10 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
   // Satırlarda seçilenleri tutmak için benzersiz anahtarlar
   final Set<String> _selectedKeys = {};
+
+  // Image picker için
+  final ImagePicker _picker = ImagePicker();
+  XFile? _pickedImage;
 
   // Görseldeki sırayla 4 item
   late final List<ClosetItemModel> _rows = _resolveRows();
@@ -43,6 +50,24 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
   String _keyOf(ClosetItemModel it) => it.imagePath;
 
+  // ✅ sadece galeriden fotoğraf seçme fonksiyonu
+  Future<void> _pickImageFromGallery() async {
+    try {
+      final XFile? file = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 90,
+        maxWidth: 2048,
+      );
+      if (file != null) {
+        setState(() => _pickedImage = file);
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Image pick failed: $e')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -59,7 +84,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
 
-      // ✅ Alt kısımda sabit Cancel / Save
+      // Alt kısımda sabit Cancel / Save
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
@@ -99,23 +124,36 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
-          // Upload Image kutusu
-          Container(
-            height: 140,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade300, width: 1.5),
-            ),
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.photo_camera_outlined,
-                      size: 32, color: AppColors.textDark),
-                  const SizedBox(height: 8),
-                  Text('Upload Image', style: AppTextStyles.subtitle),
-                ],
+          // ✅ Upload Image kutusu (dokununca galeri açılır + önizleme)
+          GestureDetector(
+            onTap: _pickImageFromGallery,
+            child: Container(
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.shade300, width: 1.5),
+              ),
+              child: Center(
+                child: _pickedImage == null
+                    ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.photo_camera_outlined,
+                        size: 32, color: AppColors.textDark),
+                    const SizedBox(height: 8),
+                    Text('Upload Image', style: AppTextStyles.subtitle),
+                  ],
+                )
+                    : ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.file(
+                    File(_pickedImage!.path),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                  ),
+                ),
               ),
             ),
           ),
@@ -168,9 +206,10 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                   ),
                   if (i != _rows.length - 1)
                     Divider(
-                        height: 1,
-                        thickness: 1,
-                        color: Colors.grey.shade200),
+                      height: 1,
+                      thickness: 1,
+                      color: Colors.grey.shade200,
+                    ),
                 ],
               ],
             ),
@@ -184,7 +223,6 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   }
 
   void _onSave() {
-    // Seçilenleri oluştur
     final selected =
     _rows.where((it) => _selectedKeys.contains(_keyOf(it))).toList();
 
@@ -198,16 +236,20 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     final name =
     _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
 
-    // MockOutfits’e ekle → MyOutfits listesinde görünsün
+    // ✅ Eğer kullanıcı fotoğraf seçtiyse onu kullan, yoksa eskisi gibi item görselini kullan
+    final String previewPath =
+    _pickedImage != null ? _pickedImage!.path : selected.first.imagePath;
+
     final outfit = Outfit(
       name: name,
       items: selected,
-      imagePath: selected.first.imagePath, // öne çıkacak görsel
+      imagePath: previewPath,
     );
     MockOutfits.list.insert(0, outfit);
 
-    Navigator.pop(context, true); // MyOutfitPage, setState() ile tazeler
+    Navigator.pop(context, true);
   }
+
 }
 
 class _ItemRow extends StatelessWidget {
@@ -228,8 +270,12 @@ class _ItemRow extends StatelessWidget {
       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.asset(item.imagePath,
-            width: 46, height: 46, fit: BoxFit.cover),
+        child: Image.asset(
+          item.imagePath,
+          width: 46,
+          height: 46,
+          fit: BoxFit.cover,
+        ),
       ),
       title: Text(item.name, style: AppTextStyles.title),
       trailing: InkWell(

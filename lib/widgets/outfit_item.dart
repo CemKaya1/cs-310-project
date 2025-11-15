@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
@@ -15,6 +17,23 @@ class OutfitItem extends StatelessWidget {
     this.draggable = false,
     this.compact = false,
   });
+
+  // ------------------------------------------------------------
+  //  imagePath hem asset (mock) hem de dosya yolu (galeri) olabilir
+  // ------------------------------------------------------------
+  Widget _buildImage(
+      String path, {
+        double? width,
+        double? height,
+        BoxFit fit = BoxFit.cover,
+      }) {
+    // projedeki mock görseller
+    if (path.startsWith('assets/') || path.startsWith('lib/')) {
+      return Image.asset(path, width: width, height: height, fit: fit);
+    }
+    // kullanıcının galeriden seçtiği resimler
+    return Image.file(File(path), width: width, height: height, fit: fit);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +56,7 @@ class OutfitItem extends StatelessWidget {
   }
 
   // ============================================================
-  //   ANA WİDGET – COMPACT ve NORMAL mod
+  //   ANA WIDGET – COMPACT ve NORMAL mod
   // ============================================================
   Widget _buildContent(BuildContext context) {
     if (compact) {
@@ -49,7 +68,7 @@ class OutfitItem extends StatelessWidget {
           border: Border.all(color: Colors.grey.shade300),
         ),
         clipBehavior: Clip.hardEdge,
-        child: Image.asset(
+        child: _buildImage(
           outfit.imagePath,
           fit: BoxFit.cover,
         ),
@@ -79,7 +98,7 @@ class OutfitItem extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
+              child: _buildImage(
                 outfit.imagePath,
                 width: size.width / 4,
                 height: double.infinity,
