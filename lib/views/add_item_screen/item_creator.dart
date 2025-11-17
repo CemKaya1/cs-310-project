@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// No dart:io or image_picker imports, to satisfy the constraint.
 
 void main() {
   runApp(const ItemCreatorApp());
@@ -33,10 +32,8 @@ class ItemCreatorPage extends StatefulWidget {
 class _ItemCreatorPageState extends State<ItemCreatorPage> {
   final _formKey = GlobalKey<FormState>();
 
-  // Function to simulate image upload and explain the package requirement
   void _onUploadImageTap(BuildContext context) {
-    // Note: Since you cannot use an external package, a real file picker
-    // for gallery/camera is NOT possible. This is a placeholder.
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -83,12 +80,11 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                         'Upload Image',
                         style: TextStyle(
                           fontSize: 18,
-                          fontWeight: FontWeight.bold, // REPLACED FontWeight.w600
+                          fontWeight: FontWeight.bold, 
                           color: Colors.black,
                         ),
                       ),
                       const SizedBox(height: 12),
-                      // NEW: Wrapped Container with GestureDetector to make it tappable
                       GestureDetector(
                         onTap: () => _onUploadImageTap(context),
                         child: Container(
@@ -115,7 +111,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                                 'Upload Image',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  fontWeight: FontWeight.bold, // REPLACED FontWeight.w600
+                                  fontWeight: FontWeight.bold, 
                                 ),
                               ),
                             ],
@@ -215,4 +211,5 @@ class _ItemTextField extends StatelessWidget {
       ),
     );
   }
+
 }
