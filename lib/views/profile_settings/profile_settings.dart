@@ -16,11 +16,12 @@ class _ProfileAppState extends State<ProfileApp> {
 
   ThemeData get _lightTheme => ThemeData(
     scaffoldBackgroundColor: Colors.grey.shade100,
+    cardColor: Colors.white,
     colorScheme: ColorScheme.light(
       primary: Colors.blueGrey.shade900,
       onPrimary: Colors.white,
       surface: Colors.white,
-      onSurface: Colors.black87,
+      onSurface: Colors.blueGrey.shade900,
     ),
     dividerColor: Colors.blueGrey.shade100,
     useMaterial3: true,
@@ -28,8 +29,9 @@ class _ProfileAppState extends State<ProfileApp> {
 
   ThemeData get _darkTheme => ThemeData(
     scaffoldBackgroundColor: Colors.blueGrey.shade900,
+    cardColor: Colors.blueGrey.shade800,
     colorScheme: ColorScheme.dark(
-      primary: Colors.lightBlueAccent,
+      primary: Colors.lightBlueAccent.shade100,
       onPrimary: Colors.black,
       surface: Colors.blueGrey.shade800,
       onSurface: Colors.white,
@@ -136,11 +138,11 @@ class ProfileSettingsPage extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 48,
-                      backgroundColor: Colors.blue.shade100,
+                      backgroundColor: Colors.blue.shade400,
                       child: Icon(
                         Icons.person_rounded,
                         size: 60,
-                        color: Colors.grey,
+                        color: Colors.blueGrey.shade50,
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -206,13 +208,16 @@ class ProfileSettingsPage extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color:
-                        isDarkTheme ? Colors.blueGrey : Colors.blue.shade900,
+                        color: isDarkTheme
+                            ? Colors.blueGrey.shade700
+                            : Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.nightlight_round,
-                        color: Colors.white,
+                        color: isDarkTheme
+                            ? Colors.lightBlueAccent.shade100
+                            : Colors.blueGrey.shade900,
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -238,11 +243,12 @@ class ProfileSettingsPage extends StatelessWidget {
                     ),
                     Switch(
                       value: isDarkModeEnabled,
-                      activeColor:
-                      isDarkTheme ? Colors.black : Colors.white,
-                      activeTrackColor: Colors.blueGrey,
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.blueGrey.shade100,
+                      activeColor: isDarkTheme
+                          ? Colors.blueGrey.shade900
+                          : Colors.white,
+                      activeTrackColor: Colors.lightBlueAccent.shade100,
+                      inactiveThumbColor: Colors.blueGrey.shade50,
+                      inactiveTrackColor: Colors.blueGrey.shade200,
                       onChanged: onDarkModeChanged,
                     ),
                   ],
@@ -254,7 +260,7 @@ class ProfileSettingsPage extends StatelessWidget {
                 height: 52,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
+                    backgroundColor: Colors.red.shade400,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(30),
