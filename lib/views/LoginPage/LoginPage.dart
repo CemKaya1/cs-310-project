@@ -1,13 +1,6 @@
 import 'package:flutter/material.dart';
 
-// --- Simplified Color Definitions ---
-// Using standard Material colors for simplicity
-const Color _primaryColor = Colors.deepPurple; // Replaces 0xFF6B4EFF
-const Color _backgroundColor = Color(0xFFF7F5FF); // Kept this slightly off-white for distinction
-const Color _inputFillColor = Colors.grey; // Simplified for input background
-const Color _inputBorderColor = Colors.grey; // Simplified for input border
-const Color _inputLabelColor = Colors.black54; // Simplified for label text
-const Color _outlineButtonBorderColor = Colors.grey; // Simplified for outline button border
+const Color primaryAppColor = Colors.deepPurple;
 
 void main() {
   runApp(const OutfitlyApp());
@@ -24,7 +17,7 @@ class OutfitlyApp extends StatelessWidget {
       theme: ThemeData(
         // Use the defined primary color for the seed color
         colorScheme: ColorScheme.fromSeed(
-          seedColor: _primaryColor,
+          seedColor: primaryAppColor,
           brightness: Brightness.light,
         ),
         useMaterial3: true,
@@ -72,8 +65,8 @@ class _LoginScreenState extends State<LoginScreen> {
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
-      // Using simple white background, or keep the off-white constant
-      backgroundColor: _backgroundColor,
+      // Using a standard light grey for background instead of a hex constant
+      backgroundColor: Colors.grey[50],
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -81,11 +74,11 @@ class _LoginScreenState extends State<LoginScreen> {
             constraints: const BoxConstraints(maxWidth: 420),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.white, // Using simple Colors.white
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(24),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black26, // Using simple black with opacity
+                    color: Colors.black26,
                     offset: Offset(0, 16),
                     blurRadius: 32,
                   ),
@@ -104,6 +97,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
+                          // Use the theme's primary color for the logo/title
+                          color: colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 32),
@@ -140,7 +135,9 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () => _handleAction('Register'),
                               style: OutlinedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: const BorderSide(color: _outlineButtonBorderColor),
+                                // Use simple Colors.grey for border
+                                side: const BorderSide(color: Colors.grey),
+                                foregroundColor: colorScheme.primary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -154,8 +151,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               onPressed: () => _handleAction('Log In'),
                               style: ElevatedButton.styleFrom(
                                 padding: const EdgeInsets.symmetric(vertical: 16),
-                                backgroundColor: colorScheme.primary, // Using Theme color
-                                foregroundColor: colorScheme.onPrimary, // Using Theme color
+                                backgroundColor: colorScheme.primary,
+                                foregroundColor: colorScheme.onPrimary,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -195,7 +192,8 @@ class _LoginScreenState extends State<LoginScreen> {
           label,
           style: const TextStyle(
             fontSize: 14,
-            color: _inputLabelColor,
+            // Use standard black54 for label color
+            color: Colors.black54,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -209,12 +207,13 @@ class _LoginScreenState extends State<LoginScreen> {
             hintText: hintText,
             errorStyle: TextStyle(color: colorScheme.error),
             filled: true,
-            fillColor: _inputFillColor,
+            // Use standard grey[200] for input fill color
+            fillColor: Colors.grey[200],
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-            // Border definitions use theme colors/constants
+            // Border definitions now use simple Colors.grey for enabled state
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: _inputBorderColor),
+              borderSide: const BorderSide(color: Colors.grey),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
