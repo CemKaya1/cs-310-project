@@ -4,6 +4,12 @@ void main() {
   runApp(const OutfitlyApp());
 }
 
+const _seedColor = Colors.indigo;
+const _lightBackground = Color(0xFFF5F5F7);
+const _darkBackground = Color(0xFF0F0F0F);
+const _lightSurface = Colors.white;
+const _darkSurface = Color(0xFF1C1C1E);
+
 class OutfitlyApp extends StatefulWidget {
   const OutfitlyApp({super.key});
 
@@ -22,45 +28,10 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
 
   @override
   Widget build(BuildContext context) {
-    final baseLight = ThemeData.light(useMaterial3: true);
-    final baseDark = ThemeData.dark(useMaterial3: true);
-
     return MaterialApp(
       title: 'Outfitly',
-      theme: baseLight.copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          background: Colors.grey.shade100,
-        ),
-        scaffoldBackgroundColor: Colors.grey.shade100,
-        textTheme: baseLight.textTheme.apply(
-          bodyColor: Colors.black87,
-          displayColor: Colors.black87,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.black87,
-          elevation: 0,
-          centerTitle: true,
-        ),
-      ),
-      darkTheme: baseDark.copyWith(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.indigo,
-          brightness: Brightness.dark,
-        ),
-        scaffoldBackgroundColor: Colors.black,
-        textTheme: baseDark.textTheme.apply(
-          bodyColor: Colors.white,
-          displayColor: Colors.white,
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-        ),
-      ),
+      theme: _buildTheme(Brightness.light),
+      darkTheme: _buildTheme(Brightness.dark),
       themeMode: _themeMode,
       home: OutfitlyHomePage(
         isDarkModeEnabled: _themeMode == ThemeMode.dark,
@@ -69,6 +40,43 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
       debugShowCheckedModeBanner: false,
     );
   }
+}
+
+ThemeData _buildTheme(Brightness brightness) {
+  final base = brightness == Brightness.dark
+      ? ThemeData.dark(useMaterial3: true)
+      : ThemeData.light(useMaterial3: true);
+
+  final isDark = brightness == Brightness.dark;
+  final colorScheme = ColorScheme.fromSeed(
+    seedColor: _seedColor,
+    brightness: brightness,
+    background: isDark ? _darkBackground : _lightBackground,
+    surface: isDark ? _darkSurface : _lightSurface,
+  );
+
+  return base.copyWith(
+    colorScheme: colorScheme,
+    scaffoldBackgroundColor: colorScheme.background,
+    textTheme: base.textTheme.apply(
+      bodyColor: colorScheme.onBackground,
+      displayColor: colorScheme.onBackground,
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.transparent,
+      foregroundColor: colorScheme.onBackground,
+      elevation: 0,
+      centerTitle: true,
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: MaterialStateProperty.resolveWith(
+            (states) => colorScheme.primary,
+      ),
+      trackColor: MaterialStateProperty.resolveWith(
+            (states) => colorScheme.primary.withOpacity(0.4),
+      ),
+    ),
+  );
 }
 
 class OutfitlyHomePage extends StatelessWidget {
@@ -107,8 +115,7 @@ class OutfitlyHomePage extends StatelessWidget {
               ),
               child: CircleAvatar(
                 radius: 18,
-                backgroundColor:
-                Theme.of(context).colorScheme.primaryContainer,
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
                 child: Icon(
                   Icons.person_outline,
                   color: Theme.of(context).colorScheme.primary,
@@ -146,9 +153,7 @@ class OutfitlyHomePage extends StatelessWidget {
                   Text(
                     'Organize your wardrobe and plan your perfect outfits',
                     textAlign: TextAlign.center,
-                    style: textTheme.bodyLarge?.copyWith(
-                      color: Theme.of(context).colorScheme.onBackground,
-                    ),
+                    style: textTheme.bodyLarge,
                   ),
                 ],
               ),
@@ -201,11 +206,11 @@ class _BottomNavRow extends StatelessWidget {
       decoration: BoxDecoration(
         color: scheme.surface,
         borderRadius: BorderRadius.circular(40),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
+            color: scheme.shadow.withOpacity(0.12),
             blurRadius: 12,
-            offset: Offset(0, 6),
+            offset: const Offset(0, 6),
           ),
         ],
       ),
@@ -312,6 +317,49 @@ class PlannerScreen extends StatelessWidget {
     return const _SimpleDestinationScaffold(
       title: 'Planner',
       description: 'Plan upcoming looks on the calendar.',
+    );
+  }
+}
+
+class _SimpleDestinationScaffold extends StatelessWidget {
+  const _SimpleDestinationScaffold({
+    required this.title,
+    required this.description,
+  });
+
+  final String title;
+  final String description;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+      ),
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                textAlign: TextAlign.center,
+                style: textTheme.bodyMedium,
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -523,47 +571,6 @@ class LoginRegisterScreen extends StatelessWidget {
               ElevatedButton(
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('Back to Profile'),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SimpleDestinationScaffold extends StatelessWidget {
-  const _SimpleDestinationScaffold({
-    required this.title,
-    required this.description,
-  });
-
-  final String title;
-  final String description;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-      ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                description,
-                textAlign: TextAlign.center,
-                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ],
           ),
