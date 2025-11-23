@@ -1,9 +1,7 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:cs_310_project/core/constants/app_colors.dart';
-import 'package:cs_310_project/core/constants/app_text_styles.dart';
+
 import 'package:cs_310_project/core/mock/mock_items.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/item_model.dart';
@@ -19,38 +17,14 @@ class OutfitCreatorPage extends StatefulWidget {
 class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   final _nameCtrl = TextEditingController();
 
-  // Satırlarda seçilenleri tutmak için benzersiz anahtarlar
   final Set<String> _selectedKeys = {};
+  late final List<ClosetItemModel> _rows = MockItems.list;
 
-  // Image picker için
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
 
-  // Görseldeki sırayla 4 item
-  late final List<ClosetItemModel> _rows = _resolveRows();
-
-  List<ClosetItemModel> _resolveRows() {
-    ClosetItemModel pickByName(String name, {String? fallbackCategory}) {
-      final list = MockItems.list;
-      final byName =
-      list.where((e) => e.name.toLowerCase() == name.toLowerCase());
-      if (byName.isNotEmpty) return byName.first;
-      if (fallbackCategory == null) return list.first;
-      final byCat = list.where((e) => e.category == fallbackCategory);
-      return byCat.isNotEmpty ? byCat.first : list.first;
-    }
-
-    return [
-      pickByName('Turtleneck Sweater', fallbackCategory: 'Top'),
-      pickByName('Striped T-shirt', fallbackCategory: 'Top'),
-      pickByName('Shorts', fallbackCategory: 'Bottom'),
-      pickByName('Jacket', fallbackCategory: 'Outer'),
-    ];
-  }
-
   String _keyOf(ClosetItemModel it) => it.imagePath;
 
-  // ✅ sadece galeriden fotoğraf seçme fonksiyonu
   Future<void> _pickImageFromGallery() async {
     try {
       final XFile? file = await _picker.pickImage(
@@ -58,6 +32,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
         imageQuality: 90,
         maxWidth: 2048,
       );
+
       if (file != null) {
         setState(() => _pickedImage = file);
       }
@@ -70,21 +45,23 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
-      // Üstte sadece geri oku olan, başlıksız AppBar
+      backgroundColor: scheme.background,
+
+      // Üstte geri tuşu
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
           onPressed: () => Navigator.pop(context),
-          tooltip: 'Back',
         ),
-        automaticallyImplyLeading: true,
-        title: null,
+        backgroundColor: scheme.surface,
         elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       ),
 
-      // Alt kısımda sabit Cancel / Save
+      // Alt Save / Cancel barı
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
@@ -95,9 +72,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                 child: OutlinedButton(
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    side: BorderSide(color: Colors.grey.shade400),
-                    foregroundColor: AppColors.textDark,
-                    textStyle: AppTextStyles.button,
+                    foregroundColor: scheme.onSurface,
+                    side: BorderSide(color: scheme.outlineVariant),
                   ),
                   onPressed: () => Navigator.pop(context, false),
                   child: const Text('Cancel'),
@@ -108,9 +84,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                 child: FilledButton(
                   style: FilledButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
-                    backgroundColor: AppColors.textDark,
-                    foregroundColor: Colors.white,
-                    textStyle: AppTextStyles.button,
+                    backgroundColor: scheme.primary,
+                    foregroundColor: scheme.onPrimary,
                   ),
                   onPressed: _onSave,
                   child: const Text('Save'),
@@ -121,28 +96,37 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
         ),
       ),
 
+      // Body
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
-          // ✅ Upload Image kutusu (dokununca galeri açılır + önizleme)
+          // Upload Image
           GestureDetector(
             onTap: _pickImageFromGallery,
             child: Container(
               height: 140,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: scheme.surface,
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: Colors.grey.shade300, width: 1.5),
+                border: Border.all(color: scheme.outlineVariant, width: 1.5),
               ),
               child: Center(
                 child: _pickedImage == null
                     ? Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.photo_camera_outlined,
-                        size: 32, color: AppColors.textDark),
+                    Icon(
+                      Icons.photo_camera_outlined,
+                      size: 32,
+                      color: scheme.onSurface,
+                    ),
                     const SizedBox(height: 8),
-                    Text('Upload Image', style: AppTextStyles.subtitle),
+                    Text(
+                      'Upload Image',
+                      style: textTheme.bodyLarge?.copyWith(
+                        color: scheme.onSurface,
+                      ),
+                    ),
                   ],
                 )
                     : ClipRRect(
@@ -157,65 +141,75 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
               ),
             ),
           ),
+
           const SizedBox(height: 12),
 
-          // Outfit name input
+          // Outfit Name input
           TextField(
             controller: _nameCtrl,
+            style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
             decoration: InputDecoration(
               hintText: 'Outfit Name',
-              hintStyle:
-              AppTextStyles.subtitle.copyWith(color: Colors.grey.shade500),
+              hintStyle: textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurface.withOpacity(0.6),
+              ),
               contentPadding:
               const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              filled: true,
+              fillColor: scheme.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: scheme.outlineVariant),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: Colors.grey.shade300),
+                borderSide: BorderSide(color: scheme.outlineVariant),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: scheme.primary, width: 2),
               ),
             ),
           ),
+
           const SizedBox(height: 12),
 
-          // 4 satırlık liste
+          // TÜM ITEMLERİN SCROLL OLABİLEN LİSTESİ
           Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: scheme.surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: Colors.grey.shade300, width: 1.2),
+              border: Border.all(color: scheme.outlineVariant, width: 1.2),
             ),
-            child: Column(
-              children: [
-                for (int i = 0; i < _rows.length; i++) ...[
-                  _ItemRow(
-                    item: _rows[i],
-                    selected: _selectedKeys.contains(_keyOf(_rows[i])),
-                    onPlus: () {
-                      setState(() {
-                        final k = _keyOf(_rows[i]);
-                        if (_selectedKeys.contains(k)) {
-                          _selectedKeys.remove(k);
-                        } else {
-                          _selectedKeys.add(k);
-                        }
-                      });
-                    },
-                  ),
-                  if (i != _rows.length - 1)
-                    Divider(
-                      height: 1,
-                      thickness: 1,
-                      color: Colors.grey.shade200,
-                    ),
-                ],
-              ],
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _rows.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                thickness: 1,
+                color: scheme.outlineVariant,
+              ),
+              itemBuilder: (context, i) {
+                final item = _rows[i];
+                return _ItemRow(
+                  item: item,
+                  selected: _selectedKeys.contains(_keyOf(item)),
+                  onPlus: () {
+                    setState(() {
+                      final key = _keyOf(item);
+                      if (_selectedKeys.contains(key)) {
+                        _selectedKeys.remove(key);
+                      } else {
+                        _selectedKeys.add(key);
+                      }
+                    });
+                  },
+                );
+              },
             ),
           ),
 
-          // Altta butonlar var; burada ekstra boşluk bırakmayalım
           const SizedBox(height: 8),
         ],
       ),
@@ -236,7 +230,6 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     final name =
     _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
 
-    // ✅ Eğer kullanıcı fotoğraf seçtiyse onu kullan, yoksa eskisi gibi item görselini kullan
     final String previewPath =
     _pickedImage != null ? _pickedImage!.path : selected.first.imagePath;
 
@@ -245,11 +238,11 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
       items: selected,
       imagePath: previewPath,
     );
+
     MockOutfits.list.insert(0, outfit);
 
     Navigator.pop(context, true);
   }
-
 }
 
 class _ItemRow extends StatelessWidget {
@@ -265,9 +258,12 @@ class _ItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return ListTile(
-      contentPadding:
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(10),
         child: Image.asset(
@@ -277,21 +273,31 @@ class _ItemRow extends StatelessWidget {
           fit: BoxFit.cover,
         ),
       ),
-      title: Text(item.name, style: AppTextStyles.title),
+
+      title: Text(
+        item.name,
+        style: textTheme.bodyLarge?.copyWith(
+          color: scheme.onSurface,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+
       trailing: InkWell(
         onTap: onPlus,
         borderRadius: BorderRadius.circular(18),
+
         child: Container(
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: Colors.white,
-            border: Border.all(color: Colors.grey.shade300),
+            color: scheme.surface,
+            border: Border.all(color: scheme.outlineVariant),
             shape: BoxShape.circle,
           ),
+
           child: Icon(
             selected ? Icons.check : Icons.add,
-            color: AppColors.textDark,
+            color: scheme.onSurface,
           ),
         ),
       ),

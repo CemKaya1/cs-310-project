@@ -38,10 +38,14 @@ class MyClosetPage extends StatelessWidget {
           ),
       ),
         floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add item logic here
-          print('Add button pressed');
-        },
+          onPressed: () async {
+            final created = await Navigator.pushNamed(context, "/item_creator");
+            if (created == true && context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Item added successfully")),
+              );
+            }
+          },
         backgroundColor: Colors.black, // Dark background for the FAB
         foregroundColor: Colors.white, // White plus icon
         shape: const CircleBorder(), // Ensure it's circular

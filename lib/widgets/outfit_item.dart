@@ -1,7 +1,5 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
-import 'package:cs_310_project/core/constants/app_colors.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
 
 class OutfitItem extends StatelessWidget {
@@ -18,21 +16,11 @@ class OutfitItem extends StatelessWidget {
     this.compact = false,
   });
 
-  // ------------------------------------------------------------
-  //  imagePath hem asset (mock) hem de dosya yolu (galeri) olabilir
-  // ------------------------------------------------------------
-  Widget _buildImage(
-      String path, {
-        double? width,
-        double? height,
-        BoxFit fit = BoxFit.cover,
-      }) {
-    // projedeki mock görseller
+  Widget _buildImage(String path, {double? width, double? height}) {
     if (path.startsWith('assets/') || path.startsWith('lib/')) {
-      return Image.asset(path, width: width, height: height, fit: fit);
+      return Image.asset(path, width: width, height: height, fit: BoxFit.cover);
     }
-    // kullanıcının galeriden seçtiği resimler
-    return Image.file(File(path), width: width, height: height, fit: fit);
+    return Image.file(File(path), width: width, height: height, fit: BoxFit.cover);
   }
 
   @override
@@ -48,48 +36,53 @@ class OutfitItem extends StatelessWidget {
           opacity: 0.35,
           child: _buildContent(context),
         ),
-        child: GestureDetector(onTap: onTap, child: _buildContent(context)),
+        child: GestureDetector(
+          onTap: onTap,
+          child: _buildContent(context),
+        ),
       );
     }
 
-    return GestureDetector(onTap: onTap, child: _buildContent(context));
+    return GestureDetector(
+      onTap: onTap,
+      child: _buildContent(context),
+    );
   }
 
-  // ============================================================
-  //   ANA WIDGET – COMPACT ve NORMAL mod
-  // ============================================================
+  // ANA WIDGET
   Widget _buildContent(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     if (compact) {
       return Container(
         width: 48,
         height: 48,
         decoration: BoxDecoration(
+          color: scheme.surface,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: Colors.grey.shade300),
+          border: Border.all(color: scheme.outlineVariant),
         ),
         clipBehavior: Clip.hardEdge,
-        child: _buildImage(
-          outfit.imagePath,
-          fit: BoxFit.cover,
-        ),
+        child: _buildImage(outfit.imagePath),
       );
     }
 
-    final Size size = MediaQuery.sizeOf(context);
+    final size = MediaQuery.sizeOf(context);
 
     return Container(
       width: size.width / 1.1,
       height: size.height / 8.5,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(width: 0.8, color: Colors.grey.shade400),
+        color: scheme.surface,
+        border: Border.all(color: scheme.outlineVariant, width: 0.8),
         borderRadius: BorderRadius.circular(12),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Colors.black12,
-            blurRadius: 3,
-            offset: Offset(0, 2),
-          ),
+            color: scheme.shadow.withOpacity(0.15),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          )
         ],
       ),
       child: Row(
@@ -102,19 +95,17 @@ class OutfitItem extends StatelessWidget {
                 outfit.imagePath,
                 width: size.width / 4,
                 height: double.infinity,
-                fit: BoxFit.cover,
               ),
             ),
           ),
           Expanded(
             child: Text(
               outfit.name,
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-                color: AppColors.textDark,
-              ),
               overflow: TextOverflow.ellipsis,
+              style: textTheme.titleMedium?.copyWith(
+                color: scheme.onSurface,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           )
         ],

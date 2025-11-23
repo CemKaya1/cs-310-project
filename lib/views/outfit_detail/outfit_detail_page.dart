@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:cs_310_project/core/constants/app_colors.dart';
-import 'package:cs_310_project/core/constants/app_text_styles.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
 import 'package:cs_310_project/widgets/closet_item.dart';
@@ -32,25 +30,38 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
     if (newName.isNotEmpty) {
       setState(() => outfit.name = newName);
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Outfit updated")),
       );
     }
 
     setState(() => isEditing = false);
+    Navigator.pop(context, true);
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
+      backgroundColor: scheme.background,
+
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textDark),
+          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(outfit.name, style: AppTextStyles.title),
+        title: Text(
+          outfit.name,
+          style: textTheme.titleLarge?.copyWith(
+            color: scheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: scheme.surface,
         elevation: 0,
       ),
 
@@ -59,33 +70,59 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: OutfitItem(outfit: outfit)),
 
+            Center(child: OutfitItem(outfit: outfit)),
             const SizedBox(height: 16),
 
             // === NAME EDITING ===
             if (isEditing)
               TextField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(
+                style: textTheme.bodyLarge?.copyWith(color: scheme.onSurface),
+                decoration: InputDecoration(
                   labelText: "Outfit Name",
-                  border: OutlineInputBorder(),
+                  labelStyle: TextStyle(color: scheme.onSurface),
+                  filled: true,
+                  fillColor: scheme.surface,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: scheme.outlineVariant),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                    BorderSide(color: scheme.primary, width: 2),
+                  ),
                 ),
               )
             else
               Center(
                 child: Text(
                   outfit.name,
-                  style: AppTextStyles.title.copyWith(fontSize: 22),
+                  style: textTheme.headlineSmall?.copyWith(
+                    color: scheme.onBackground,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
 
-            Text("Included Items", style: AppTextStyles.title),
-            const SizedBox(height: 10),
+            Text(
+              "Included Items",
+              style: textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.onBackground,
+              ),
+            ),
 
-            // === ITEM LIST ===
+            const SizedBox(height: 12),
+
+            // === Items List ===
             Expanded(
               child: ListView.builder(
                 itemCount: outfit.items.length,
@@ -116,12 +153,15 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                               },
                               child: Container(
                                 padding: const EdgeInsets.all(4),
-                                decoration: const BoxDecoration(
-                                  color: Colors.red,
+                                decoration: BoxDecoration(
+                                  color: scheme.error,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.close,
-                                    color: Colors.white, size: 18),
+                                child: Icon(
+                                  Icons.close,
+                                  color: scheme.onError,
+                                  size: 18,
+                                ),
                               ),
                             ),
                           ),
@@ -134,7 +174,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
             const SizedBox(height: 12),
 
-            // === BUTTONS ===
+            // === ACTION BUTTONS ===
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -144,22 +184,29 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                       : () => setState(() => isEditing = true),
                   icon: Icon(
                     isEditing ? Icons.save : Icons.edit,
-                    color: AppColors.textDark,
+                    color: scheme.onSurface,
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: scheme.outlineVariant),
                   ),
                   label: Text(
                     isEditing ? "Save" : "Edit",
-                    style: const TextStyle(color: AppColors.textDark),
+                    style: TextStyle(color: scheme.onSurface),
                   ),
                 ),
 
                 FilledButton.icon(
-                  style:
-                  FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: scheme.error,
+                    foregroundColor: scheme.onError,
+                  ),
                   onPressed: () {
                     MockOutfits.list.remove(outfit);
+
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("${outfit.name} deleted")),
                     );
+
                     Navigator.pop(context, true);
                   },
                   icon: const Icon(Icons.delete),

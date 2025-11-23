@@ -1,73 +1,81 @@
 import 'package:flutter/material.dart';
 
-class OutlifyHome extends StatelessWidget {
-  const OutlifyHome({super.key});
+class OutfitlyHomePage extends StatelessWidget {
+  const OutfitlyHomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
+      backgroundColor: scheme.background,
+
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("Outfitly Home"),
-      ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              const Text(
-                'Navigation Test Buttons',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 20),
-
-              // ---- EXISTING BUTTONS ----
-              const Text('Go to My Closet'),
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/my_closet");
-                  },
-                  child: const Text("My Closet"),
-                ),
-              ),
-
-              const Text('Go to Item Detail'),
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/item_detail");
-                  },
-                  child: const Text("Item Detail"),
-                ),
-              ),
-
-              const Text('Go to Outfit Detail'),
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/outfit_detail");
-                  },
-                  child: const Text("Outfit Detail"),
-                ),
-              ),
-
-              const Text('Go to Planner'),
-              Padding(
-                padding: const EdgeInsets.only(top: 4, bottom: 12),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, "/planner");
-                  },
-                  child: const Text("Planner"),
-                ),
-              ),
-            ],
+        automaticallyImplyLeading: false,
+        backgroundColor: scheme.surface,
+        elevation: 0,
+        centerTitle: true,   // 🔥 Artık kesin ortada!
+        title: Text(
+          "Home",
+          style: textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: scheme.onSurface,
           ),
+        ),
+
+        actions: [
+          GestureDetector(
+            onTap: () => Navigator.pushNamed(context, "/profile"),
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: scheme.primaryContainer,
+                child: Icon(
+                  Icons.person_outline,
+                  color: scheme.primary,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+
+      // Body içerik (hiçbir şey değişmedi)
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Outfitly",
+              style: textTheme.headlineLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.onBackground,
+              ),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Welcome Back!",
+              style: textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: scheme.onBackground,
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Text(
+              "Organize your wardrobe and plan your perfect outfits",
+              textAlign: TextAlign.center,
+              style: textTheme.bodyLarge?.copyWith(
+                color: scheme.onBackground.withOpacity(0.85),
+              ),
+            ),
+          ],
         ),
       ),
     );
