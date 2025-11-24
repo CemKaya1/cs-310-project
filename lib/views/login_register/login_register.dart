@@ -14,7 +14,7 @@ class _LoginPageState extends State<LoginPage> {
   final _passwordCtrl = TextEditingController();
 
   // --------------------------------------------
-  // RUNTIME USER LIST (başlangıçta tamamen boş)
+  // RUNTIME USER LIST 
   // --------------------------------------------
   final List<Map<String, String>> _users = [];
 
