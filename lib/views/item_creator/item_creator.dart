@@ -103,7 +103,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      // 📤 Upload Image Title
+                      //  Upload Image Title
                       Text(
                         "Upload Image",
                         style: textTheme.titleMedium?.copyWith(
@@ -114,7 +114,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 12),
 
-                      // 📸 Upload Container
+                      //  Upload Container
                       GestureDetector(
                         onTap: _pickImage,
                         child: Container(
@@ -164,7 +164,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 24),
 
-                      // 📝 Form Fields
+                      //  Form Fields
                       Form(
                         key: _formKey,
                         child: Column(
@@ -184,7 +184,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 24),
 
-                      // ⚫ Cancel + Save Buttons
+                      //  Cancel + Save Buttons
                       Row(
                         children: [
                           Expanded(
@@ -239,7 +239,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     );
   }
 
-  // 🌟 Form Field Component — DARK MODE FIXED
+  //  Form Field Component 
   Widget _field(
       String label,
       TextEditingController ctrl,
@@ -251,7 +251,6 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
       validator: (v) =>
       (v == null || v.trim().isEmpty) ? "$label is required" : null,
 
-      // 🔥 En önemli satır — yazının rengini dark/light doğru yapar
       style: textTheme.bodyMedium?.copyWith(
         color: scheme.onSurface,
       ),
