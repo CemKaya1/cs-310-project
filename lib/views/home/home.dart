@@ -15,7 +15,7 @@ class OutfitlyHomePage extends StatelessWidget {
         automaticallyImplyLeading: false,
         backgroundColor: scheme.surface,
         elevation: 0,
-        centerTitle: true,   // 🔥 Artık kesin ortada!
+        centerTitle: true,   
         title: Text(
           "Home",
           style: textTheme.titleLarge?.copyWith(
@@ -42,7 +42,6 @@ class OutfitlyHomePage extends StatelessWidget {
         ],
       ),
 
-      // Body içerik (hiçbir şey değişmedi)
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
