@@ -68,34 +68,43 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     return Scaffold(
       backgroundColor: scheme.background,
 
+      appBar: AppBar(
+        backgroundColor: scheme.background,
+        elevation: 0,
+        leadingWidth: 100,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            padding: const EdgeInsets.only(left: 16),
+            color: Colors.transparent,
+            child: Row(
+              children: [
+                Icon(Icons.arrow_back, color: scheme.onSurface, size: 24),
+                const SizedBox(width: 4),
+                Text(
+                  "Back",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      // -------------------------------------
+
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-
+          // Üstteki AppBar geldiği için dikey padding'i biraz azalttık veya ihtiyaca göre düzenledik
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
 
-              // 🔙 Back Row
-              Row(
-                children: [
-                  IconButton(
-                    icon: Icon(Icons.arrow_back_ios_new,
-                        color: scheme.onBackground, size: 20),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "Back",
-                    style: textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: scheme.onBackground,
-                    ),
-                  )
-                ],
-              ),
-
-              const SizedBox(height: 32),
+              // ESKİ "Row" (Back button) BURADAN SİLİNDİ.
 
               Expanded(
                 child: SingleChildScrollView(
@@ -120,7 +129,6 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                         child: Container(
                           width: double.infinity,
                           height: 160,
-
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(color: scheme.outlineVariant),
@@ -133,7 +141,6 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                               )
                             ],
                           ),
-
                           child: _pickedImage == null
                               ? Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -190,7 +197,6 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                           Expanded(
                             child: OutlinedButton(
                               onPressed: () => Navigator.pop(context, false),
-
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: scheme.onSurface,
                                 side: BorderSide(color: scheme.outlineVariant),
@@ -200,17 +206,13 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-
                               child: const Text("Cancel"),
                             ),
                           ),
-
                           const SizedBox(width: 16),
-
                           Expanded(
                             child: ElevatedButton(
                               onPressed: _saveItem,
-
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: scheme.primary,
                                 foregroundColor: scheme.onPrimary,
@@ -220,13 +222,11 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-
                               child: const Text("Save"),
                             ),
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 16),
                     ],
                   ),
@@ -239,7 +239,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     );
   }
 
-  //  Form Field Component 
+  //  Form Field Component
   Widget _field(
       String label,
       TextEditingController ctrl,
@@ -250,25 +250,19 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
       controller: ctrl,
       validator: (v) =>
       (v == null || v.trim().isEmpty) ? "$label is required" : null,
-
       style: textTheme.bodyMedium?.copyWith(
         color: scheme.onSurface,
       ),
-
       cursorColor: scheme.primary,
-
       decoration: InputDecoration(
         labelText: label,
         labelStyle: TextStyle(color: scheme.onSurface),
-
         filled: true,
         fillColor: scheme.surface,
-
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: scheme.outlineVariant),
         ),
-
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: scheme.primary, width: 2),

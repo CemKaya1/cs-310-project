@@ -49,10 +49,9 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
       backgroundColor: scheme.background,
 
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
+        backgroundColor: scheme.background,
+        elevation: 0,
+        centerTitle: true,
         title: Text(
           outfit.name,
           style: textTheme.titleLarge?.copyWith(
@@ -60,9 +59,28 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        centerTitle: true,
-        backgroundColor: scheme.surface,
-        elevation: 0,
+        leadingWidth: 100,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            padding: const EdgeInsets.only(left: 16),
+            color: Colors.transparent,
+            child: Row(
+              children: [
+                Icon(Icons.arrow_back, color: scheme.onSurface, size: 24),
+                const SizedBox(width: 4),
+                Text(
+                  "Back",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
 
       body: Padding(

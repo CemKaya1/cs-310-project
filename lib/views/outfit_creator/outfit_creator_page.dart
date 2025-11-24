@@ -51,17 +51,33 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     return Scaffold(
       backgroundColor: scheme.background,
 
-      // Üstte geri tuşu
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: scheme.onSurface),
-          onPressed: () => Navigator.pop(context),
-        ),
-        backgroundColor: scheme.surface,
+        backgroundColor: scheme.background,
         elevation: 0,
+        leadingWidth: 100,
+        leading: GestureDetector(
+          onTap: () => Navigator.of(context).pop(),
+          child: Container(
+            padding: const EdgeInsets.only(left: 16),
+            color: Colors.transparent,
+            child: Row(
+              children: [
+                Icon(Icons.arrow_back, color: scheme.onSurface, size: 24),
+                const SizedBox(width: 4),
+                Text(
+                  "Back",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: scheme.onSurface,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
 
-      // Alt Save / Cancel barı
       bottomNavigationBar: SafeArea(
         top: false,
         child: Padding(
@@ -174,7 +190,6 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
           const SizedBox(height: 12),
 
-          // TÜM ITEMLERİN SCROLL OLABİLEN LİSTESİ
           Container(
             decoration: BoxDecoration(
               color: scheme.surface,
