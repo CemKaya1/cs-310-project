@@ -92,7 +92,7 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
       routes: {
         "/login": (context) => const LoginPage(),
 
-        // ❗ HOME route'u YOK artık — eskisi gibi widgetOptions üzerinden gidiyoruz
+        //  HOME route'u YOK artık — eskisi gibi widgetOptions üzerinden gidiyoruz
 
         "/profile": (context) => ProfileScreen(
           isDarkModeEnabled: _themeMode == ThemeMode.dark,
@@ -101,7 +101,7 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
 
         "/my_closet": (context) => const MyClosetPage(),
         "/item_creator": (context) => const ItemCreatorPage(),
-        "/item_detail": (context) => const ItemDetailPage(),
+        "/item_detail": (context) => const ItemDetailPage(name: "",image: "",index: 0,),
 
         "/my_outfits": (context) => const MyOutfitPage(),
         "/outfit_creator": (context) => const OutfitCreatorPage(),
