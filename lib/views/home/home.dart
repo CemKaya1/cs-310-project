@@ -32,10 +32,8 @@ class OutfitlyHomePage extends StatelessWidget {
               child: CircleAvatar(
                 radius: 18,
                 backgroundColor: scheme.primaryContainer,
-                child: Icon(
-                  Icons.person_outline,
-                  color: scheme.primary,
-                ),
+                child: Image.network("https://cdn-icons-png.flaticon.com/512/6325/6325109.png"),
+                //Icon(Icons.person_outline,color: scheme.primary,),
               ),
             ),
           )

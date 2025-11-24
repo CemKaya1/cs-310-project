@@ -1,5 +1,4 @@
 import 'package:cs_310_project/core/mock/mock_items.dart';
-import 'package:cs_310_project/views/item_detail/item_detail_page.dart';
 import 'package:cs_310_project/widgets/closet_item.dart';
 import 'package:flutter/material.dart';
 
@@ -47,15 +46,14 @@ class _MyClosetPageState extends State<MyClosetPage> {
                     padding: const EdgeInsets.all(8.0),
                     child: GestureDetector(
                       onTap: () async {
-                        final deleted = await Navigator.push(
+                        final deleted = await Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => ItemDetailPage(
-                              name: MockItems.list[index].name,
-                              image: MockItems.list[index].imagePath,
-                              index: index,
-                            ),
-                          ),
+                          "/item_detail",
+                          arguments: {
+                            'index': index,
+                            'name': MockItems.list[index].name,
+                            'image': MockItems.list[index].imagePath,
+                          },
                         );
                         if (deleted == true && mounted) {
                           setState(() {}); // rebuild to reflect deletion

@@ -2,15 +2,10 @@ import 'package:cs_310_project/core/mock/mock_items.dart';
 import 'package:flutter/material.dart';
 
 class ItemDetailPage extends StatefulWidget {
-  final String name;
-  final String image;
-  final int index;
 
   const ItemDetailPage({
     super.key,
-    required this.name,
-    required this.image,
-    required this.index,
+
   });
 
   @override
@@ -45,12 +40,16 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    int itemIndex = widget.index;
     
     // Get the current theme data
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final args =
+        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
 
+    final int? index = args['index'] as int?;
+    final String itemName = args['name'] as String;
+    final String imagePath = args['image'] as String;
     return Scaffold(
       // Uses the global scaffold background (White in Light, Dark Grey/Black in Dark)
       backgroundColor: theme.scaffoldBackgroundColor, 
@@ -96,7 +95,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                 ),
                 child: Center(
                   child: Image.asset(
-                    widget.image,
+                    imagePath,
                     errorBuilder: (context, error, stackTrace) => 
                         Icon(Icons.image_not_supported, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
                   ),
@@ -106,7 +105,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               const SizedBox(height: 10),
 
               Text(
-                widget.name,
+  itemName,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 24,
@@ -169,8 +168,8 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () {
-                        if (itemIndex >= 0 && itemIndex < MockItems.list.length) {
-                          MockItems.list.removeAt(widget.index);
+                        if (index! >= 0 && index < MockItems.list.length) {
+                          MockItems.list.removeAt(index);
                         }
                         Navigator.of(context).pop(true);
                       },

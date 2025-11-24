@@ -50,7 +50,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             CircleAvatar(
               radius: 48,
               backgroundColor: scheme.primaryContainer,
-              child: Icon(Icons.person, size: 48, color: scheme.primary),
+              child: Image.network("https://cdn-icons-png.flaticon.com/512/6325/6325109.png"),
+              
+              //Icon(Icons.person, size: 48, color: scheme.primary),
             ),
 
             const SizedBox(height: 16),

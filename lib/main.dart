@@ -101,7 +101,7 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
 
         "/my_closet": (context) => const MyClosetPage(),
         "/item_creator": (context) => const ItemCreatorPage(),
-        "/item_detail": (context) => const ItemDetailPage(name: "",image: "",index: 0,),
+        "/item_detail": (context) => const ItemDetailPage(),
 
         "/my_outfits": (context) => const MyOutfitPage(),
         "/outfit_creator": (context) => const OutfitCreatorPage(),
