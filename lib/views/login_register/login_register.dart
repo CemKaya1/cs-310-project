@@ -30,65 +30,82 @@ class _LoginPageState extends State<LoginPage> {
   bool _isValidEmail(String email) {
     return email.contains("@") ;
   }
+  void _showAlert(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Invalid Input"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
 
   // --------------------------------------------
   // LOGIN
   // --------------------------------------------
   void _login() {
-    if (_formKey.currentState!.validate()) {
-      final email = _emailCtrl.text.trim();
-      final password = _passwordCtrl.text.trim();
-
-      // email-password eşleşen kayıt var mı?
-      final exists = _users.any(
-            (u) => u["email"] == email && u["password"] == password,
-      );
-
-      if (!exists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Invalid email or password")),
-        );
-        return;
-      }
-
-      Navigator.pushReplacementNamed(context, "/");
-
-
+    if (!_formKey.currentState!.validate()) {
+      _showAlert("Please fix the form errors before logging in.");
+      return;
     }
+
+    final email = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text.trim();
+
+    final exists = _users.any(
+          (u) => u["email"] == email && u["password"] == password,
+    );
+
+    if (!exists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid email or password")),
+      );
+      return;
+    }
+
+    Navigator.pushReplacementNamed(context, "/");
   }
+
 
   // --------------------------------------------
   // REGISTER
   // --------------------------------------------
   void _register() {
-    if (_formKey.currentState!.validate()) {
-      final email = _emailCtrl.text.trim();
-      final password = _passwordCtrl.text.trim();
-
-      // email zaten kayıtlı mı?
-      bool alreadyExists = _users.any((u) => u["email"] == email);
-
-      if (alreadyExists) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Email already registered")),
-        );
-        return;
-      }
-
-      // Yeni kullanıcı ekleniyor
-      _users.add({
-        "email": email,
-        "password": password,
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Registration successful! Logging in...")),
-      );
-
-      Navigator.pushReplacementNamed(context, "/");
-
+    if (!_formKey.currentState!.validate()) {
+      _showAlert("Please fix the form errors before registering.");
+      return;
     }
+
+    final email = _emailCtrl.text.trim();
+    final password = _passwordCtrl.text.trim();
+
+    bool alreadyExists = _users.any((u) => u["email"] == email);
+
+    if (alreadyExists) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Email already registered")),
+      );
+      return;
+    }
+
+    _users.add({
+      "email": email,
+      "password": password,
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Registration successful! Logging in...")),
+    );
+
+    Navigator.pushReplacementNamed(context, "/");
   }
+
 
   @override
   Widget build(BuildContext context) {
