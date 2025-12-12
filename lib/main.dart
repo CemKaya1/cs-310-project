@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 // MAIN SCREENS
 import 'package:cs_310_project/views/login_register/login_register.dart';
@@ -23,7 +24,9 @@ import 'package:cs_310_project/views/planner/planner_page.dart';
 import 'package:cs_310_project/widgets/bottom_nav_bar.dart';
 
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(const OutfitlyApp());
 }
 
