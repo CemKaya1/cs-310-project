@@ -90,10 +90,11 @@ class _PlannerPageState extends State<PlannerPage> {
                       final entry = filledSlots[index];
 
                       return DragTarget<Outfit>(
-                        onAccept: (outfit) {
+                        onAccept: (Outfit outfit) {
                           // Mock Outfit'i Firebase'e kaydet
                           plannerProvider.assignOutfitToDay(index, outfit);
                         },
+                        
                         builder: (context, candidate, rejected) {
                           final bool isHovering = candidate.isNotEmpty;
 
