@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/widgets/outfit_item.dart';
+import 'package:provider/provider.dart';
+import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
+
 
 class MyOutfitPage extends StatefulWidget {
   const MyOutfitPage({super.key});
@@ -10,6 +13,15 @@ class MyOutfitPage extends StatefulWidget {
 }
 
 class _MyOutfitPageState extends State<MyOutfitPage> {
+
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      context.read<OutfitsProvider>().hydrateMockOutfitsFromFirestore();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final outfits = MockOutfits.list;
@@ -18,7 +30,6 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
 
     return Scaffold(
       backgroundColor: scheme.background,
-
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,

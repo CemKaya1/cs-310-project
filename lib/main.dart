@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:cs_310_project/views/planner/planner_provider.dart';
+import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
+
 
 // MAIN SCREENS
 import 'package:cs_310_project/views/login_register/login_register.dart';
@@ -40,6 +42,8 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => PlannerProvider()),
+        ChangeNotifierProvider(create: (_) => OutfitsProvider()),
+
       ],
       child: const OutfitlyApp(),
     ),

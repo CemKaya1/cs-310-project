@@ -7,6 +7,10 @@ import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/item_model.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
 
+import 'package:provider/provider.dart';
+import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
+
+
 class OutfitCreatorPage extends StatefulWidget {
   const OutfitCreatorPage({super.key});
 
@@ -231,7 +235,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     );
   }
 
-  void _onSave() {
+  Future<void> _onSave() async {
+
     final selected =
     _rows.where((it) => _selectedKeys.contains(_keyOf(it))).toList();
 
@@ -256,7 +261,14 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
     MockOutfits.list.insert(0, outfit);
 
-    Navigator.pop(context, true);
+    try {
+      await context.read<OutfitsProvider>().addOutfit(outfit);
+    } catch (_) {
+      // şimdilik Firestore permission hatası yüzünden geri dönüş engellenmesin
+    }
+
+    Navigator.of(context, rootNavigator: true).pop(true);
+
   }
 }
 
