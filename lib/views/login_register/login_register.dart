@@ -49,7 +49,7 @@ class _LoginPageState extends State<LoginPage> {
   // --------------------------------------------
   // LOGIN
   // --------------------------------------------
-  void _login() {
+  Future<void> _login() async {
     if (!_formKey.currentState!.validate()) {
       _showAlert("Please fix the form errors before logging in.");
       return;
@@ -57,14 +57,15 @@ class _LoginPageState extends State<LoginPage> {
 
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
+  // MODIFIED START: delegate authentication to LoginRegisterProvider (Firebase)
+  final provider = context.read<LoginRegisterProvider>();
+  final success = await provider.login(email, password);
+  // MODIFIED END
 
-    final exists = _users.any(
-          (u) => u["email"] == email && u["password"] == password,
-    );
-
-    if (!exists) {
+    if (!success) {
+      final msg = provider.error ?? 'Login failed';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid email or password")),
+        SnackBar(content: Text(msg)),
       );
       return;
     }
@@ -76,7 +77,7 @@ class _LoginPageState extends State<LoginPage> {
   // --------------------------------------------
   // REGISTER
   // --------------------------------------------
-  void _register() {
+  Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
       _showAlert("Please fix the form errors before registering.");
       return;
@@ -85,19 +86,20 @@ class _LoginPageState extends State<LoginPage> {
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
 
+  // MODIFIED START: delegate registration to LoginRegisterProvider (Firebase)
+  final provider = context.read<LoginRegisterProvider>();
+  final success = await provider.register(email, password);
+  // MODIFIED END
+
     bool alreadyExists = _users.any((u) => u["email"] == email);
 
-    if (alreadyExists) {
+    if (!success) {
+      final msg = provider.error ?? 'Registration failed';
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Email already registered")),
+        SnackBar(content: Text(msg)),
       );
       return;
     }
-
-    _users.add({
-      "email": email,
-      "password": password,
-    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Registration successful! Logging in...")),
@@ -236,40 +238,58 @@ class _LoginPageState extends State<LoginPage> {
                       // -----------------------------------------
                       // BUTTONS
                       // -----------------------------------------
-                      Row(
-                        children: [
-                          Expanded(
-                            child: OutlinedButton(
-                              onPressed: _register,
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                side: BorderSide(color: scheme.primary),
-                                foregroundColor: scheme.primary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                      // MODIFIED START: login/register buttons now observe provider's loading state
+                      Consumer<LoginRegisterProvider>(
+                        builder: (context, provider, _) {
+                          return Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: provider.loading ? null : _register,
+                                  style: OutlinedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    side: BorderSide(color: scheme.primary),
+                                    foregroundColor: scheme.primary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: provider.loading
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2),
+                                        )
+                                      : const Text("Register"),
                                 ),
                               ),
-                              child: const Text("Register"),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: _login,
-                              style: ElevatedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                backgroundColor: scheme.primary,
-                                foregroundColor: scheme.onPrimary,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: provider.loading ? null : _login,
+                                  style: ElevatedButton.styleFrom(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    backgroundColor: scheme.primary,
+                                    foregroundColor: scheme.onPrimary,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: provider.loading
+                                      ? const SizedBox(
+                                          height: 16,
+                                          width: 16,
+                                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        )
+                                      : const Text("Log In"),
                                 ),
-                                elevation: 0,
                               ),
-                              child: const Text("Log In"),
-                            ),
-                          ),
-                        ],
+                            ],
+                          );
+                        },
                       )
+                      // MODIFIED END,
                     ],
                   ),
                 ),
