@@ -41,24 +41,52 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     }
   }
 
+
   void _saveItem() {
     if (!_formKey.currentState!.validate()) return;
 
-    final String finalImagePath =
-        _pickedImage?.path ?? "lib/core/mock/mock_images/white_placeholder.png";
+  // MODIFIED START: get provider to persist data to Firestore (non-blocking UX)
+  final provider = context.read<ItemCreatorProvider>();
 
-    final newItem = ClosetItemModel(
-      name: _nameCtrl.text.trim(),
-      category: _categoryCtrl.text.trim(),
-      style: _styleCtrl.text.trim(),
-      season: _seasonCtrl.text.trim(),
-      color: _colorCtrl.text.trim(),
-      imagePath: finalImagePath,
-    );
+  // We don't use Firebase Storage. Use a mock string URL if an image file
+  // was picked (to represent uploaded URL) or fallback to an asset path.
+        final String imageUrl = _pickedImage != null
+            ? 'https://example.com/mock_images/${DateTime.now().millisecondsSinceEpoch}.jpg'
+            : 'lib/core/mock/mock_images/white_placeholder.png';
 
-    MockItems.list.insert(0, newItem);
-    Navigator.pop(context, true);
+        // Keep adding to local mock list for immediate UI feedback (unchanged behavior)
+        final newItem = ClosetItemModel(
+          name: _nameCtrl.text.trim(),
+          category: _categoryCtrl.text.trim(),
+          style: _styleCtrl.text.trim(),
+          season: _seasonCtrl.text.trim(),
+          color: _colorCtrl.text.trim(),
+          imagePath: imageUrl,
+        );
+
+        MockItems.list.insert(0, newItem);
+
+  // Also persist to Firestore via provider (real-time updates will flow via streams elsewhere)
+  // MODIFIED: provider.saveItem called to persist item document under users/{uid}/items
+  provider.saveItem(
+          name: _nameCtrl.text.trim(),
+          category: _categoryCtrl.text.trim(),
+          style: _styleCtrl.text.trim(),
+          season: _seasonCtrl.text.trim(),
+          color: _colorCtrl.text.trim(),
+          imageUrl: imageUrl,
+        ).then((ok) {
+          Navigator.pop(context, true);
+        }).catchError((e) {
+          // If Firestore write fails, still close but show message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save to cloud: $e')),
+          );
+          Navigator.pop(context, true);
+        });
+  // MODIFIED END
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -270,4 +298,5 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
       ),
     );
   }
+
 }
