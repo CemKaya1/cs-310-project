@@ -6,11 +6,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:cs_310_project/views/planner/planner_provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
+import 'package:provider/provider.dart';
 
 // MODIFIED START: Added app-level providers below to wire auth and page-specific providers.
 // These were added to integrate Firebase Auth, login/register logic and item creator
 // without changing the existing UI structure.
-import 'package:cs_310_project/providers/auth_provider.dart';
 import 'package:cs_310_project/views/login_register/login_register_provider.dart';
 import 'package:cs_310_project/views/item_creator/item_creator_provider.dart';
 // MODIFIED END: app-level provider imports
@@ -48,21 +48,20 @@ void main() async {
   }
   runApp(
     MultiProvider(
+  // MODIFIED START: registered new providers here. Kept existing providers unchanged
+  // to avoid breaking other pages.
       providers: [
-        
+  // app-wide providers
+  // MODIFIED: AuthProvider removed; Login/Register provider now exposes auth helpers
+  ChangeNotifierProvider(create: (_) => LoginRegisterProvider()),
+        ChangeNotifierProvider(create: (_) => ItemCreatorProvider()),
+
+        // existing providers
         ChangeNotifierProvider(create: (_) => PlannerProvider()),
         ChangeNotifierProvider(create: (_) => OutfitsProvider()),
-
-        // MODIFIED START: registered new providers here. Kept existing providers unchanged
-        // to avoid breaking other pages.
-        // app-wide providers
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => LoginRegisterProvider()),
-        ChangeNotifierProvider(create: (_) => ItemCreatorProvider()),
-        // MODIFIED END: provider registrations
-
-      ],
-      child: const OutfitlyApp(),
+  ],
+  // MODIFIED END: provider registrations
+  child: const OutfitlyApp(),
     ),
   );
 }
