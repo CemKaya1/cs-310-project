@@ -35,5 +35,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  # Asset'lerin konumu. Klasörün gerçekten burada olduğundan emin ol.
+  # Genelde "assets/images/" kök dizinde tutulur ama lib içinde tutuyorsan böyle kalabilir.
   assets:
     - lib/core/mock/mock_images/

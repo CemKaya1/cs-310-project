@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cs_310_project/core/mock/mock_outfits.dart';
+import 'package:cs_310_project/models/outfit_model.dart';
 import 'package:cs_310_project/widgets/outfit_item.dart';
 import 'package:provider/provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
@@ -13,18 +13,8 @@ class MyOutfitPage extends StatefulWidget {
 }
 
 class _MyOutfitPageState extends State<MyOutfitPage> {
-
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(() {
-      context.read<OutfitsProvider>().hydrateMockOutfitsFromFirestore();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    final outfits = MockOutfits.list;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
@@ -63,36 +53,47 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
 
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: StreamBuilder<List<Outfit>>(
+          stream: context.watch<OutfitsProvider>().outfitsStream,
+          builder: (context, snapshot) {
+            final outfits = snapshot.data ?? const <Outfit>[];
 
-        child: outfits.isEmpty
-            ? Center(
-          child: Text(
-            "Henüz kombinin yok",
-            style: textTheme.bodyLarge?.copyWith(
-              color: scheme.onBackground,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        )
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
-            : ListView.separated(
-          itemCount: outfits.length,
-          separatorBuilder: (_, __) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            final outfit = outfits[index];
+            if (outfits.isEmpty) {
+              return Center(
+                child: Text(
+                  "Henüz kombinin yok",
+                  style: textTheme.bodyLarge?.copyWith(
+                    color: scheme.onBackground,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              );
+            }
 
-            return OutfitItem(
-              outfit: outfit,
-              onTap: () async {
-                final updated = await Navigator.pushNamed(
-                  context,
-                  "/outfit_detail",
-                  arguments: outfit,
+            return ListView.separated(
+              itemCount: outfits.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 10),
+              itemBuilder: (context, index) {
+                final outfit = outfits[index];
+
+                return OutfitItem(
+                  outfit: outfit,
+                  onTap: () async {
+                    final updated = await Navigator.pushNamed(
+                      context,
+                      "/outfit_detail",
+                      arguments: outfit,
+                    );
+
+                    if (updated == true && mounted) {
+                      setState(() {});
+                    }
+                  },
                 );
-
-                if (updated == true && mounted) {
-                  setState(() {});
-                }
               },
             );
           },

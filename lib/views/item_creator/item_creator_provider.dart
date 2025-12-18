@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:cs_310_project/services/database_service.dart';
+import 'package:cs_310_project/services/storage_service.dart';
+import 'dart:io';
 
 class ItemCreatorProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService();
+  final StorageService _storage = StorageService();
 
   bool _loading = false;
   String? _error;
@@ -16,25 +19,37 @@ class ItemCreatorProvider extends ChangeNotifier {
   }
 
   /// Save an item to Firestore under users/{uid}/items. imageUrl should be a
-  /// mock URL or asset path (we don't use Firebase Storage here).
+  /// download URL (Firebase Storage) or an asset placeholder when no image picked.
   Future<bool> saveItem({
     required String name,
     required String category,
     required String style,
     required String season,
     required String color,
-    required String imageUrl,
+    File? imageFile,
   }) async {
     await _setLoading(true);
     _error = null;
     try {
-      await _db.addItem({
+      final ref = _db.newItemRef();
+
+      String imageUrl = 'lib/core/mock/mock_images/white_placeholder.png';
+      String? imageStoragePath;
+
+      if (imageFile != null) {
+        final uploaded = await _storage.uploadItemImage(itemId: ref.id, file: imageFile);
+        imageUrl = uploaded.downloadUrl;
+        imageStoragePath = uploaded.fullPath;
+      }
+
+      await _db.setItem(ref, {
         'name': name,
         'category': category,
         'style': style,
         'season': season,
         'color': color,
         'imageUrl': imageUrl,
+        'imagePath': imageStoragePath,
       });
       return true;
     } catch (e) {

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/models/planner_entry_model.dart';
@@ -5,11 +7,13 @@ import 'package:cs_310_project/models/outfit_model.dart';
 import 'package:cs_310_project/core/mock/mock_items.dart';
 import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/item_model.dart';
+import 'package:cs_310_project/services/storage_service.dart';
 
 
 class FirestoreService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final StorageService _storage = StorageService();
 
   String? get currentUserId => _auth.currentUser?.uid;
 
@@ -44,11 +48,13 @@ class FirestoreService {
         .collection('planner')
         .doc(docId)
         .set({
+      'id': docId,
+      'createdBy': currentUserId,
+      'createdAt': FieldValue.serverTimestamp(),
       'gridIndex': index,
+      'outfitId': outfit.id,
       'outfitName': outfit.name,
-      // Mock datadan ismi alıp kaydediyoruz
       'outfitImagePath': outfit.imagePath,
-      // Mock datadan resmi alıp kaydediyoruz
     });
   }
 
@@ -121,5 +127,119 @@ class FirestoreService {
       );
     }
   }
-}
 
+  // --- OUTFITS (REAL-TIME) ---
+
+  Stream<List<Outfit>> getOutfitsStream() {
+    if (currentUserId == null) return Stream.value([]);
+
+    return _db
+        .collection('users')
+        .doc(currentUserId)
+        .collection('outfits')
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs.map(_outfitFromDoc).toList());
+  }
+
+  Outfit _outfitFromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
+    final data = doc.data() ?? {};
+
+    final String name = (data['name'] ?? 'New Outfit') as String;
+    final String imagePath = (data['imagePath'] ?? '') as String;
+    final String? imageStoragePath =
+        (data['imageStoragePath'] as String?) ?? (data['imagePathStorage'] as String?);
+
+    // For now, keep compatibility with existing schema that stored `itemImagePaths`.
+    final List<String> itemPaths =
+        List<String>.from(data['itemImagePaths'] ?? data['itemPaths'] ?? []);
+
+    final items = MockItems.list.where((item) => itemPaths.contains(item.imagePath)).toList();
+
+    return Outfit(
+      id: doc.id,
+      name: name,
+      imagePath: imagePath,
+      imageStoragePath: imageStoragePath,
+      items: items,
+    );
+  }
+
+  Future<DocumentReference<Map<String, dynamic>>> createOutfit({
+    required Outfit outfit,
+  }) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+
+    final ref = _db.collection('users').doc(uid).collection('outfits').doc();
+    await ref.set({
+      'id': ref.id,
+      'createdBy': uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'name': outfit.name,
+      'imagePath': outfit.imagePath,
+      'imageStoragePath': outfit.imageStoragePath,
+      'itemImagePaths': outfit.items.map((e) => e.imagePath).toList(),
+    });
+    return ref;
+  }
+
+  Future<DocumentReference<Map<String, dynamic>>> createOutfitWithOptionalUpload({
+    required String name,
+    required List<ClosetItemModel> items,
+    required String fallbackImagePath,
+    String? localImageFilePath,
+  }) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+
+    final ref = _db.collection('users').doc(uid).collection('outfits').doc();
+
+    String imagePath = fallbackImagePath;
+    String? imageStoragePath;
+
+    if (localImageFilePath != null && localImageFilePath.isNotEmpty) {
+      final uploaded = await _storage.uploadOutfitImage(
+        outfitId: ref.id,
+        file: File(localImageFilePath),
+      );
+      imagePath = uploaded.downloadUrl;
+      imageStoragePath = uploaded.fullPath;
+    }
+
+    await ref.set({
+      'id': ref.id,
+      'createdBy': uid,
+      'createdAt': FieldValue.serverTimestamp(),
+      'name': name,
+      'imagePath': imagePath,
+      'imageStoragePath': imageStoragePath,
+      'itemImagePaths': items.map((e) => e.imagePath).toList(),
+    });
+
+    return ref;
+  }
+
+  Future<void> updateOutfitName({required String outfitId, required String name}) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+    await _db.collection('users').doc(uid).collection('outfits').doc(outfitId).update({
+      'name': name,
+    });
+  }
+
+  Future<void> deleteOutfit({required String outfitId, String? imageStoragePath}) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+
+    await _db.collection('users').doc(uid).collection('outfits').doc(outfitId).delete();
+
+    if (imageStoragePath != null && imageStoragePath.isNotEmpty) {
+      try {
+        await _storage.deleteByFullPath(imageStoragePath);
+      } catch (_) {
+        // ignore storage delete failures (e.g., missing object) to keep UX smooth
+      }
+    }
+  }
+}

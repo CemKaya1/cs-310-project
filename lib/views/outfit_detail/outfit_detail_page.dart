@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
 import 'package:cs_310_project/widgets/closet_item.dart';
 import 'package:cs_310_project/widgets/outfit_item.dart';
+import 'package:provider/provider.dart';
+import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
 
 class OutfitDetailPage extends StatefulWidget {
   const OutfitDetailPage({super.key});
@@ -20,16 +21,27 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     outfit = (ModalRoute.of(context)?.settings.arguments as Outfit?) ??
-        MockOutfits.list.first;
-
+        Outfit(name: 'New Outfit', items: [], imagePath: '');
     _nameCtrl = TextEditingController(text: outfit.name);
   }
 
-  void _saveChanges() {
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveChanges() async {
     final newName = _nameCtrl.text.trim();
 
     if (newName.isNotEmpty) {
       setState(() => outfit.name = newName);
+
+      if (outfit.id != null) {
+        await context
+            .read<OutfitsProvider>()
+            .updateOutfitName(outfitId: outfit.id!, name: newName);
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Outfit updated")),
@@ -218,8 +230,13 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     backgroundColor: scheme.error,
                     foregroundColor: scheme.onError,
                   ),
-                  onPressed: () {
-                    MockOutfits.list.remove(outfit);
+                  onPressed: () async {
+                    if (outfit.id != null) {
+                      await context.read<OutfitsProvider>().deleteOutfit(
+                            outfitId: outfit.id!,
+                            imageStoragePath: outfit.imageStoragePath,
+                          );
+                    }
 
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text("${outfit.name} deleted")),

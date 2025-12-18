@@ -6,7 +6,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:cs_310_project/views/planner/planner_provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
-import 'package:provider/provider.dart';
 
 // MODIFIED START: Added app-level providers below to wire auth and page-specific providers.
 // These were added to integrate Firebase Auth, login/register logic and item creator
@@ -41,11 +40,6 @@ import 'package:cs_310_project/widgets/bottom_nav_bar.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
-  if (FirebaseAuth.instance.currentUser == null) {
-    await FirebaseAuth.instance.signInAnonymously();
-    print("Anonim giriş yapıldı ID: ${FirebaseAuth.instance.currentUser?.uid}");
-  }
   runApp(
     MultiProvider(
   // MODIFIED START: registered new providers here. Kept existing providers unchanged
@@ -124,9 +118,6 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
         useMaterial3: true,
       ),
 
-      // ---------- Start Page ----------
-      initialRoute: "/login",
-
       // ---------- Named Routes ----------
       routes: {
         "/login": (context) => const LoginPage(),
@@ -149,13 +140,33 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
         "/planner": (context) => const PlannerPage(),
       },
 
-      // ---------- ROOT: Bottom Nav + Main Pages ----------
-      home: Scaffold(
-        bottomNavigationBar: OutfitlyBottomNavBar(
-          currentIndex: _selectedIndex,
-          onTap: _onItemTapped,
-        ),
-        body: widgetOptions[_selectedIndex],
+      // ---------- ROOT: Auth Gate ----------
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          final user = snapshot.data;
+
+          // While waiting, show a minimal placeholder (keeps app responsive).
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          // Logged out -> Login/Register
+          if (user == null) {
+            return const LoginPage();
+          }
+
+          // Logged in -> Bottom Nav + Main Pages
+          return Scaffold(
+            bottomNavigationBar: OutfitlyBottomNavBar(
+              currentIndex: _selectedIndex,
+              onTap: _onItemTapped,
+            ),
+            body: widgetOptions[_selectedIndex],
+          );
+        },
       ),
     );
   }

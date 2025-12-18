@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:cs_310_project/views/login_register/login_register_provider.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -28,7 +31,8 @@ class _LoginPageState extends State<LoginPage> {
   // EMAIL VALIDATION: en az "@" ve "." içermeli
   // --------------------------------------------
   bool _isValidEmail(String email) {
-    return email.contains("@") ;
+    // Minimal kontrol: "@" içermeli
+    return email.contains("@");
   }
   void _showAlert(String message) {
     showDialog(
@@ -69,8 +73,6 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
-
-    Navigator.pushReplacementNamed(context, "/");
   }
 
 
@@ -104,8 +106,6 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Registration successful! Logging in...")),
     );
-
-    Navigator.pushReplacementNamed(context, "/");
   }
 
 
@@ -210,7 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: true,
                         validator: (v) {
                           if (v == null || v.isEmpty) return "Password required";
-                          if (v.length < 4) return "Password must has at least 4 characters";
+                          if (v.length < 6) return "Password must have at least 6 characters";
                           return null;
                         },
                         decoration: InputDecoration(

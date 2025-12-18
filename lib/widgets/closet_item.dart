@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class ClosetItem extends StatelessWidget {
   final String imagePath;
@@ -37,11 +38,10 @@ class ClosetItem extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
+              child: _buildImage(
                 imagePath,
                 width: size.width / 4,
                 height: double.infinity,
-                fit: BoxFit.cover,
               ),
             ),
           ),
@@ -59,5 +59,15 @@ class ClosetItem extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildImage(String path, {required double width, required double height}) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, width: width, height: height, fit: BoxFit.cover);
+    }
+    if (path.startsWith('assets/') || path.startsWith('lib/')) {
+      return Image.asset(path, width: width, height: height, fit: BoxFit.cover);
+    }
+    return Image.file(File(path), width: width, height: height, fit: BoxFit.cover);
   }
 }

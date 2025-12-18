@@ -17,6 +17,9 @@ class OutfitItem extends StatelessWidget {
   });
 
   Widget _buildImage(String path, {double? width, double? height}) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, width: width, height: height, fit: BoxFit.cover);
+    }
     if (path.startsWith('assets/') || path.startsWith('lib/')) {
       return Image.asset(path, width: width, height: height, fit: BoxFit.cover);
     }

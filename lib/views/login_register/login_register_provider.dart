@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:cs_310_project/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cs_310_project/services/mock_seed_service.dart';
 
 class LoginRegisterProvider extends ChangeNotifier {
-  final AuthService _auth = AuthService();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final MockSeedService _seed = MockSeedService();
 
   bool _loading = false;
   String? _error;
@@ -31,10 +32,14 @@ class LoginRegisterProvider extends ChangeNotifier {
     await _setLoading(true);
     _error = null;
     try {
-      await _auth.login(email, password);
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       await _saveLastEmail(email);
+      await _seed.seedIfEmpty();
       return true;
-    } on Exception catch (e) {
+    } on FirebaseAuthException catch (e) {
+      _error = e.message ?? e.code;
+      return false;
+    } catch (e) {
       _error = e.toString();
       return false;
     } finally {
@@ -46,10 +51,17 @@ class LoginRegisterProvider extends ChangeNotifier {
     await _setLoading(true);
     _error = null;
     try {
-      await _auth.register(email, password);
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
       await _saveLastEmail(email);
+      await _seed.seedIfEmpty();
       return true;
-    } on Exception catch (e) {
+    } on FirebaseAuthException catch (e) {
+      _error = e.message ?? e.code;
+      return false;
+    } catch (e) {
       _error = e.toString();
       return false;
     } finally {
@@ -58,14 +70,14 @@ class LoginRegisterProvider extends ChangeNotifier {
   }
 
   // --- Auth helpers (moved from separate AuthProvider) ---
-  User? get currentUser => FirebaseAuth.instance.currentUser;
+  User? get currentUser => _auth.currentUser;
 
-  Stream<User?> get authStateChanges => _auth.userStream;
+  Stream<User?> get authStateChanges => _auth.authStateChanges();
 
   bool get isLoggedIn => currentUser != null && !(currentUser?.isAnonymous ?? true);
 
   Future<void> logout() async {
-    await _auth.logout();
+    await _auth.signOut();
     notifyListeners();
   }
 }

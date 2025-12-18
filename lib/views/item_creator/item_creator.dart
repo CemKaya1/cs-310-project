@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cs_310_project/models/item_model.dart';
 import 'package:cs_310_project/core/mock/mock_items.dart';
+import 'package:provider/provider.dart';
+
+import 'package:cs_310_project/views/item_creator/item_creator_provider.dart';
 
 class ItemCreatorPage extends StatefulWidget {
   const ItemCreatorPage({super.key});
@@ -48,11 +51,8 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
   // MODIFIED START: get provider to persist data to Firestore (non-blocking UX)
   final provider = context.read<ItemCreatorProvider>();
 
-  // We don't use Firebase Storage. Use a mock string URL if an image file
-  // was picked (to represent uploaded URL) or fallback to an asset path.
-        final String imageUrl = _pickedImage != null
-            ? 'https://example.com/mock_images/${DateTime.now().millisecondsSinceEpoch}.jpg'
-            : 'lib/core/mock/mock_images/white_placeholder.png';
+        final File? imageFile = _pickedImage != null ? File(_pickedImage!.path) : null;
+        const String placeholderAsset = 'lib/core/mock/mock_images/white_placeholder.png';
 
         // Keep adding to local mock list for immediate UI feedback (unchanged behavior)
         final newItem = ClosetItemModel(
@@ -61,7 +61,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
           style: _styleCtrl.text.trim(),
           season: _seasonCtrl.text.trim(),
           color: _colorCtrl.text.trim(),
-          imagePath: imageUrl,
+          imagePath: placeholderAsset,
         );
 
         MockItems.list.insert(0, newItem);
@@ -74,7 +74,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
           style: _styleCtrl.text.trim(),
           season: _seasonCtrl.text.trim(),
           color: _colorCtrl.text.trim(),
-          imageUrl: imageUrl,
+          imageFile: imageFile,
         ).then((ok) {
           Navigator.pop(context, true);
         }).catchError((e) {

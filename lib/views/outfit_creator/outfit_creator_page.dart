@@ -3,9 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:cs_310_project/core/mock/mock_items.dart';
-import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/item_model.dart';
-import 'package:cs_310_project/models/outfit_model.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
@@ -250,19 +248,13 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     final name =
     _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
 
-    final String previewPath =
-    _pickedImage != null ? _pickedImage!.path : selected.first.imagePath;
-
-    final outfit = Outfit(
-      name: name,
-      items: selected,
-      imagePath: previewPath,
-    );
-
-    MockOutfits.list.insert(0, outfit);
-
     try {
-      await context.read<OutfitsProvider>().addOutfit(outfit);
+      await context.read<OutfitsProvider>().createOutfit(
+            name: name,
+            items: selected,
+            fallbackImagePath: selected.first.imagePath,
+            localImageFilePath: _pickedImage?.path,
+          );
     } catch (_) {
       // şimdilik Firestore permission hatası yüzünden geri dönüş engellenmesin
     }

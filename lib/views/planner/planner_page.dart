@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:cs_310_project/core/mock/mock_outfits.dart';
 import 'package:cs_310_project/models/outfit_model.dart';
 import 'package:cs_310_project/widgets/outfit_item.dart';
 import 'package:cs_310_project/models/planner_entry_model.dart';
 import 'package:cs_310_project/views/planner/planner_provider.dart';
+import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
 
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
@@ -117,9 +117,9 @@ class _PlannerPageState extends State<PlannerPage> {
                                 // Eğer Firebase'de veri varsa resmini göster
                                 image: entry != null && entry.outfitImagePath.isNotEmpty
                                     ? DecorationImage(
-                                  // Mock resimler asset olduğu için AssetImage kullanıyoruz.
-                                  // Eğer internet resmi olsaydı NetworkImage kullanacaktık.
-                                  image: AssetImage(entry.outfitImagePath),
+                                  image: entry.outfitImagePath.startsWith('http')
+                                      ? NetworkImage(entry.outfitImagePath)
+                                      : AssetImage(entry.outfitImagePath) as ImageProvider,
                                   fit: BoxFit.cover,
                                 )
                                     : null,
@@ -151,21 +151,39 @@ class _PlannerPageState extends State<PlannerPage> {
               const SizedBox(height: 10),
 
               // === MOCK OUTFIT LISTESI (Sürüklenecek Kaynak) ===
-              // Burası DEĞİŞMEDİ, eski Mock listen
               SizedBox(
                 height: 300,
-                child: ListView.builder(
-                  itemCount: MockOutfits.list.length,
-                  itemBuilder: (context, index) {
-                    final outfit = MockOutfits.list[index];
+                child: StreamBuilder<List<Outfit>>(
+                  stream: context.watch<OutfitsProvider>().outfitsStream,
+                  builder: (context, snapshot) {
+                    final outfits = snapshot.data ?? const [];
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
-                      child: OutfitItem(
-                        outfit: outfit,
-                        draggable: true, // Sürüklenebilir yaptık
-                        compact: false,
-                      ),
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (outfits.isEmpty) {
+                      return Center(
+                        child: Text(
+                          'No outfits yet',
+                          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                        ),
+                      );
+                    }
+
+                    return ListView.builder(
+                      itemCount: outfits.length,
+                      itemBuilder: (context, index) {
+                        final outfit = outfits[index];
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: OutfitItem(
+                            outfit: outfit,
+                            draggable: true,
+                            compact: false,
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
