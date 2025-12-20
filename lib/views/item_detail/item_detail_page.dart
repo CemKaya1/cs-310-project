@@ -1,36 +1,40 @@
-import 'package:cs_310_project/core/mock/mock_items.dart';
+import 'package:cs_310_project/views/my_closet/closet_provider.dart';
+import 'package:cs_310_project/models/item_doc_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'dart:io';
 
 class ItemDetailPage extends StatefulWidget {
-
-  const ItemDetailPage({
-    super.key,
-
-  });
+  const ItemDetailPage({super.key});
 
   @override
   State<ItemDetailPage> createState() => _ItemDetailPageState();
 }
 
 class _ItemDetailPageState extends State<ItemDetailPage> {
-  // to be aware whether we are in edit more or not
   bool _isEditing = false;
-  late final TextEditingController _categoryController;
-  late final TextEditingController _styleController;
-  late final TextEditingController _seasonController;
-  late final TextEditingController _colorController;
+  late TextEditingController _nameController;
+  late TextEditingController _categoryController;
+  late TextEditingController _styleController;
+  late TextEditingController _seasonController;
+  late TextEditingController _colorController;
 
   @override
-  void initState() {
-    super.initState();
-    _categoryController = TextEditingController(text: "");
-    _styleController = TextEditingController(text: "");
-    _seasonController = TextEditingController(text: "");
-    _colorController = TextEditingController(text: "");
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Get the item passed from MyClosetPage
+    final item = ModalRoute.of(context)!.settings.arguments as ItemDoc;
+    
+    _nameController = TextEditingController(text: item.name);
+    _categoryController = TextEditingController(text: item.category);
+    _styleController = TextEditingController(text: item.style);
+    _seasonController = TextEditingController(text: item.season);
+    _colorController = TextEditingController(text: item.color);
   }
 
   @override
   void dispose() {
+    _nameController.dispose();
     _categoryController.dispose();
     _styleController.dispose();
     _seasonController.dispose();
@@ -38,85 +42,63 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     super.dispose();
   }
 
+  Widget _buildImage(String path) {
+    if (path.startsWith('http')) {
+      return Image.network(path, fit: BoxFit.contain);
+    } else if (path.startsWith('lib/') || path.startsWith('assets/')) {
+      return Image.asset(path, fit: BoxFit.contain);
+    } else {
+      return Image.file(File(path), fit: BoxFit.contain);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    
-    // Get the current theme data
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final args =
-        ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>;
+    final item = ModalRoute.of(context)!.settings.arguments as ItemDoc;
 
-    final int? index = args['index'] as int?;
-    final String itemName = args['name'] as String;
-    final String imagePath = args['image'] as String;
     return Scaffold(
-      // Uses the global scaffold background (White in Light, Dark Grey/Black in Dark)
-      backgroundColor: theme.scaffoldBackgroundColor, 
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        leadingWidth: 100,
-        leading: GestureDetector(
-          onTap: () => Navigator.of(context).pop(),
-          child: Container(
-            padding: const EdgeInsets.only(left: 16),
-            color: Colors.transparent,
-            child: Row(
-              children: [
-                Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 24),
-                const SizedBox(width: 4),
-                Text(
-                  "Back",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: colorScheme.onSurface, 
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        title: const Text("Item Details", style: TextStyle(fontWeight: FontWeight.bold)),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Product Image Area
               Container(
                 height: 280,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
+                  color: colorScheme.surfaceVariant.withOpacity(0.3),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: Center(
-                  child: Image.asset(
-                    imagePath,
-                    errorBuilder: (context, error, stackTrace) => 
-                        Icon(Icons.image_not_supported, size: 80, color: colorScheme.onSurface.withOpacity(0.5)),
-                  ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20),
+                  child: _buildImage(item.imageUrl),
                 ),
               ),
-
-              const SizedBox(height: 10),
-
-              Text(
-  itemName,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: colorScheme.onSurface, 
+              const SizedBox(height: 20),
+              
+              if (_isEditing)
+                 TextField(
+                  controller: _nameController,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  decoration: const InputDecoration(border: UnderlineInputBorder()),
+                )
+              else
+                Text(
+                  _nameController.text,
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
-              ),
 
               const SizedBox(height: 30),
-
-              // Static Input Fields
               _buildDetailField(label: "Category", controller: _categoryController, theme: theme),
               const SizedBox(height: 16),
               _buildDetailField(label: "Style", controller: _styleController, theme: theme),
@@ -124,73 +106,61 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               _buildDetailField(label: "Season", controller: _seasonController, theme: theme),
               const SizedBox(height: 16),
               _buildDetailField(label: "Color", controller: _colorController, theme: theme),
-
               const SizedBox(height: 40),
 
-              // Buttons Row
               Row(
                 children: [
-                  // Edit button when clicked toggles isediting and chagnes icon and label
-                  // goes to be a save button
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _isEditing = !_isEditing;
-                        });
+                      onPressed: () async {
+                        if (_isEditing) {
+                          // Update Firestore
+                          await context.read<ClosetProvider>().updateItem(item.id, {
+                            'name': _nameController.text,
+                            'category': _categoryController.text,
+                            'style': _styleController.text,
+                            'season': _seasonController.text,
+                            'color': _colorController.text,
+                          });
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Updated!")));
+                        }
+                        setState(() => _isEditing = !_isEditing);
                       },
-                      icon: Icon(
-                        _isEditing ? Icons.check_circle_outline : Icons.edit_outlined,
-                        size: 18,
-                        color: colorScheme.onSurface,
-                      ),
-                      label: Text(
-                        _isEditing ? "Save" : "Edit",
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          color: colorScheme.onSurface,
-                        ),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        side: BorderSide(color: theme.dividerColor), 
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      icon: Icon(_isEditing ? Icons.check : Icons.edit),
+                      label: Text(_isEditing ? "Save" : "Edit"),
                     ),
                   ),
-                  
                   const SizedBox(width: 16),
-                  
-                  // Delete Button
-                  // deletes and pops to the previous screen also sets state there as well
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        if (index! >= 0 && index < MockItems.list.length) {
-                          MockItems.list.removeAt(index);
+                      onPressed: () async {
+                        // Confirm deletion
+                        bool? confirm = await showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text("Delete Item"),
+                            content: const Text("Are you sure you want to delete this item?"),
+                            actions: [
+                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
+                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete", style: TextStyle(color: Colors.red))),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true) {
+                          // Note: If imagePath was stored in Firestore as 'imagePath', use it. 
+                          // The Seed service used 'imageUrl' for asset path.
+                          await context.read<ClosetProvider>().deleteItem(item.id); 
+                          Navigator.of(context).pop();
                         }
-                        Navigator.of(context).pop(true);
                       },
-                      icon: Icon(Icons.delete_outline, size: 18, color: colorScheme.onError),
-                      label: Text(
-                        "Delete",
-                        style: TextStyle(color: colorScheme.onError, fontWeight: FontWeight.w600),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: colorScheme.error,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
+                      icon: const Icon(Icons.delete_outline),
+                      label: const Text("Delete"),
+                      style: ElevatedButton.styleFrom(backgroundColor: colorScheme.error, foregroundColor: colorScheme.onError),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -198,63 +168,22 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     );
   }
 
-// static data holder widget builder holds both the data and editing fields when it is edit mode
-  Widget _buildDetailField({
-    required String label,
-    required TextEditingController controller,
-    required ThemeData theme,
-  }) {
-    final onSurface = theme.colorScheme.onSurface;
-    
+  Widget _buildDetailField({required String label, required TextEditingController controller, required ThemeData theme}) {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor), 
+        border: Border.all(color: theme.dividerColor),
         borderRadius: BorderRadius.circular(12),
-        color: theme.cardColor, 
       ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Label
-          Text(
-            "$label:",
-            style: TextStyle(
-              color: onSurface.withOpacity(0.7), 
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          
-          const SizedBox(width: 10),
-
+          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
           Expanded(
-            child: _isEditing
-                ? TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      border: InputBorder.none,
-                      hintText: "Enter value",
-                      hintStyle: TextStyle(color: onSurface.withOpacity(0.4)), 
-                    ),
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: onSurface, 
-                    ),
-                    cursorColor: theme.colorScheme.primary, 
-                  )
-                : Text(
-                    controller.text.isEmpty ? "" : controller.text,
-                    style: TextStyle(
-                      color: onSurface, 
-                      fontSize: 16,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+            child: TextField(
+              controller: controller,
+              enabled: _isEditing,
+              decoration: const InputDecoration(border: InputBorder.none),
+            ),
           ),
         ],
       ),

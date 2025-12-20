@@ -1,3 +1,4 @@
+import 'package:cs_310_project/views/my_closet/closet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -52,6 +53,7 @@ void main() async {
 
         // existing providers
         ChangeNotifierProvider(create: (_) => PlannerProvider()),
+        ChangeNotifierProvider(create: (_) => ClosetProvider()),
         ChangeNotifierProvider(create: (_) => OutfitsProvider()),
   ],
   // MODIFIED END: provider registrations
