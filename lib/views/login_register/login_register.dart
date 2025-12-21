@@ -35,15 +35,26 @@ class _LoginPageState extends State<LoginPage> {
     return email.contains("@");
   }
   void _showAlert(String message) {
+    final scheme = Theme.of(context).colorScheme;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text("Invalid Input"),
         content: Text(message),
+        backgroundColor: scheme.surface,
+        titleTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+        ),
+        contentTextStyle: TextStyle(
+          color: scheme.onSurface,
+          fontSize: 16,
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
+            child: Text("OK", style: TextStyle(color: scheme.primary)),
           ),
         ],
       ),
@@ -112,9 +123,10 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
 
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: scheme.background,
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -122,11 +134,11 @@ class _LoginPageState extends State<LoginPage> {
             constraints: const BoxConstraints(maxWidth: 420),
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: scheme.surface,
                 borderRadius: BorderRadius.circular(24),
-                boxShadow: const [
+                boxShadow: [
                   BoxShadow(
-                    color: Colors.black26,
+                    color: scheme.shadow.withOpacity(0.2),
                     offset: Offset(0, 16),
                     blurRadius: 32,
                   ),
@@ -142,7 +154,7 @@ class _LoginPageState extends State<LoginPage> {
                       Text(
                         "Outfitly",
                         textAlign: TextAlign.center,
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        style: textTheme.headlineSmall?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: scheme.primary,
                         ),
@@ -152,11 +164,11 @@ class _LoginPageState extends State<LoginPage> {
                       // -----------------------------------------
                       // EMAIL FIELD
                       // -----------------------------------------
-                      const Text(
+                      Text(
                         "Email",
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          color: scheme.onSurface.withOpacity(0.7),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -165,6 +177,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _emailCtrl,
                         keyboardType: TextInputType.emailAddress,
+                        style: TextStyle(color: scheme.onSurface),
                         validator: (v) {
                           if (v == null || v.isEmpty) return "Email required";
                           if (!_isValidEmail(v)) return "Email should contain @ character";
@@ -172,15 +185,16 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         decoration: InputDecoration(
                           hintText: "Enter your email",
+                          hintStyle: TextStyle(color: scheme.onSurface.withOpacity(0.6)),
                           filled: true,
-                          fillColor: Colors.grey[200],
+                          fillColor: scheme.surfaceVariant,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 18,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.grey),
+                            borderSide: BorderSide(color: scheme.outline),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
@@ -195,11 +209,11 @@ class _LoginPageState extends State<LoginPage> {
                       // -----------------------------------------
                       // PASSWORD FIELD
                       // -----------------------------------------
-                      const Text(
+                      Text(
                         "Password",
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          color: scheme.onSurface.withOpacity(0.7),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -208,6 +222,7 @@ class _LoginPageState extends State<LoginPage> {
                       TextFormField(
                         controller: _passwordCtrl,
                         obscureText: true,
+                        style: TextStyle(color: scheme.onSurface),
                         validator: (v) {
                           if (v == null || v.isEmpty) return "Password required";
                           if (v.length < 6) return "Password must have at least 6 characters";
@@ -215,15 +230,16 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         decoration: InputDecoration(
                           hintText: "Enter your password",
+                          hintStyle: TextStyle(color: scheme.onSurface.withOpacity(0.6)),
                           filled: true,
-                          fillColor: Colors.grey[200],
+                          fillColor: scheme.surfaceVariant,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 18,
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
-                            borderSide: const BorderSide(color: Colors.grey),
+                            borderSide: BorderSide(color: scheme.outline),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
