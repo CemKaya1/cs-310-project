@@ -29,11 +29,6 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
         "email": user.email ?? "",
         "createdAt": FieldValue.serverTimestamp(),
       });
-    } else {
-      // İstersen "last seen" güncelle (optional)
-      await ref.update({
-        "lastSeen": FieldValue.serverTimestamp(),
-      });
     }
   }
 
@@ -110,18 +105,30 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                 color: scheme.onBackground.withOpacity(0.85),
               ),
             ),
-
             const SizedBox(height: 24),
 
-
+            // ✅ Firestore real-time gösterimi (backend kanıtı) — crash-proof
             StreamBuilder<DocumentSnapshot>(
               stream: userDocStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 }
-                final data = snapshot.data!.data() as Map<String, dynamic>?;
-                final email = data?["email"] ?? user.email ?? "unknown";
+
+                if (!snapshot.hasData || snapshot.data == null) {
+                  return Text(
+                    "Loading user...",
+                    style: textTheme.bodyMedium?.copyWith(
+                      color: scheme.onBackground.withOpacity(0.85),
+                    ),
+                  );
+                }
+
+                final raw = snapshot.data!.data();
+                final data = raw is Map<String, dynamic> ? raw : null;
+
+                final email =
+                    (data?["email"] as String?) ?? user.email ?? "unknown";
 
                 return Text(
                   "Logged in as: $email",
