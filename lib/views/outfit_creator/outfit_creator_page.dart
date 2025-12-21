@@ -2,11 +2,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'package:cs_310_project/core/mock/mock_items.dart';
 import 'package:cs_310_project/models/item_model.dart';
+import 'package:cs_310_project/models/item_doc_model.dart';
 
 import 'package:provider/provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
+import 'package:cs_310_project/views/my_closet/closet_provider.dart';
 
 
 class OutfitCreatorPage extends StatefulWidget {
@@ -19,13 +20,13 @@ class OutfitCreatorPage extends StatefulWidget {
 class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   final _nameCtrl = TextEditingController();
 
-  final Set<String> _selectedKeys = {};
-  late final List<ClosetItemModel> _rows = MockItems.list;
+  final Set<String> _selectedIds = {};
+  List<ItemDoc> _items = [];
 
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
 
-  String _keyOf(ClosetItemModel it) => it.imagePath;
+  String _keyOf(ItemDoc it) => it.id;
 
   Future<void> _pickImageFromGallery() async {
     try {
@@ -198,29 +199,54 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
               borderRadius: BorderRadius.circular(14),
               border: Border.all(color: scheme.outlineVariant, width: 1.2),
             ),
-            child: ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _rows.length,
-              separatorBuilder: (_, __) => Divider(
-                height: 1,
-                thickness: 1,
-                color: scheme.outlineVariant,
-              ),
-              itemBuilder: (context, i) {
-                final item = _rows[i];
-                return _ItemRow(
-                  item: item,
-                  selected: _selectedKeys.contains(_keyOf(item)),
-                  onPlus: () {
-                    setState(() {
-                      final key = _keyOf(item);
-                      if (_selectedKeys.contains(key)) {
-                        _selectedKeys.remove(key);
-                      } else {
-                        _selectedKeys.add(key);
-                      }
-                    });
+            child: StreamBuilder<List<ItemDoc>>(
+              stream: context.read<ClosetProvider>().itemsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                final items = snapshot.data ?? const <ItemDoc>[];
+                _items = items;
+
+                if (items.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Text(
+                      'No items yet',
+                      style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                    ),
+                  );
+                }
+
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: items.length,
+                  separatorBuilder: (_, __) => Divider(
+                    height: 1,
+                    thickness: 1,
+                    color: scheme.outlineVariant,
+                  ),
+                  itemBuilder: (context, i) {
+                    final item = items[i];
+                    return _ItemRow(
+                      item: item,
+                      selected: _selectedIds.contains(_keyOf(item)),
+                      onPlus: () {
+                        setState(() {
+                          final key = _keyOf(item);
+                          if (_selectedIds.contains(key)) {
+                            _selectedIds.remove(key);
+                          } else {
+                            _selectedIds.add(key);
+                          }
+                        });
+                      },
+                    );
                   },
                 );
               },
@@ -236,7 +262,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   Future<void> _onSave() async {
 
     final selected =
-    _rows.where((it) => _selectedKeys.contains(_keyOf(it))).toList();
+    _items.where((it) => _selectedIds.contains(_keyOf(it))).toList();
 
     if (selected.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -248,11 +274,26 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     final name =
     _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
 
+    const String placeholderAsset = 'lib/core/mock/mock_images/white_placeholder.png';
+    final String fallbackImagePath =
+        selected.first.imageUrl.isNotEmpty ? selected.first.imageUrl : placeholderAsset;
+
+    final selectedItems = selected.map((it) {
+      return ClosetItemModel(
+        name: it.name,
+        category: it.category,
+        style: it.style,
+        season: it.season,
+        color: it.color,
+        imagePath: it.imageUrl.isNotEmpty ? it.imageUrl : placeholderAsset,
+      );
+    }).toList();
+
     try {
       await context.read<OutfitsProvider>().createOutfit(
             name: name,
-            items: selected,
-            fallbackImagePath: selected.first.imagePath,
+            items: selectedItems,
+            fallbackImagePath: fallbackImagePath,
             localImageFilePath: _pickedImage?.path,
           );
     } catch (_) {
@@ -265,7 +306,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 }
 
 class _ItemRow extends StatelessWidget {
-  final ClosetItemModel item;
+  final ItemDoc item;
   final bool selected;
   final VoidCallback onPlus;
 
@@ -285,11 +326,10 @@ class _ItemRow extends StatelessWidget {
 
       leading: ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.asset(
-          item.imagePath,
+        child: _buildImage(
+          item.imageUrl,
           width: 46,
           height: 46,
-          fit: BoxFit.cover,
         ),
       ),
 
@@ -321,5 +361,18 @@ class _ItemRow extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget _buildImage(String path, {required double width, required double height}) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(path, width: width, height: height, fit: BoxFit.cover);
+    }
+    if (path.startsWith('assets/') || path.startsWith('lib/')) {
+      return Image.asset(path, width: width, height: height, fit: BoxFit.cover);
+    }
+    if (path.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return Image.file(File(path), width: width, height: height, fit: BoxFit.cover);
   }
 }

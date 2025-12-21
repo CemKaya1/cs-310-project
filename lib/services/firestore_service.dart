@@ -17,6 +17,30 @@ class FirestoreService {
 
   String? get currentUserId => _auth.currentUser?.uid;
 
+  // --- USER DOC ---
+
+  Future<void> ensureUserDoc() async {
+    final uid = currentUserId;
+    if (uid == null) return;
+    final user = _auth.currentUser;
+
+    final ref = _db.collection('users').doc(uid);
+    final snap = await ref.get();
+    if (snap.exists) return;
+
+    await ref.set({
+      'uid': uid,
+      'email': user?.email ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Stream<DocumentSnapshot<Map<String, dynamic>>> userDocStream() {
+    final uid = currentUserId;
+    if (uid == null) return const Stream.empty();
+    return _db.collection('users').doc(uid).snapshots();
+  }
+
   // --- PLANNER İŞLEMLERİ ---
 
   // Dolu günleri getir (Stream: Veri değişirse anlık günceller)
@@ -77,15 +101,19 @@ class FirestoreService {
   Future<void> saveUserOutfit(Outfit outfit) async {
     if (currentUserId == null) return;
 
-    await _db
+    final ref = _db
         .collection('users')
         .doc(currentUserId)
         .collection('outfits')
-        .add({
+        .doc();
+
+    await ref.set({
+      'id': ref.id,
+      'createdBy': currentUserId,
+      'createdAt': FieldValue.serverTimestamp(),
       'name': outfit.name,
       'imagePath': outfit.imagePath,
       'itemImagePaths': outfit.items.map((e) => e.imagePath).toList(),
-      'createdAt': FieldValue.serverTimestamp(),
     });
   }
 
@@ -150,11 +178,28 @@ class FirestoreService {
     final String? imageStoragePath =
         (data['imageStoragePath'] as String?) ?? (data['imagePathStorage'] as String?);
 
-    // For now, keep compatibility with existing schema that stored `itemImagePaths`.
-    final List<String> itemPaths =
-        List<String>.from(data['itemImagePaths'] ?? data['itemPaths'] ?? []);
+    // Prefer embedded item snapshots if present (keeps outfit self-contained).
+    final List<dynamic>? itemSnapshots = data['items'] as List<dynamic>?;
+    List<ClosetItemModel> items = [];
 
-    final items = MockItems.list.where((item) => itemPaths.contains(item.imagePath)).toList();
+    if (itemSnapshots != null) {
+      items = itemSnapshots.map((raw) {
+        final m = raw as Map<String, dynamic>;
+        return ClosetItemModel(
+          name: m['name'] ?? '',
+          category: m['category'] ?? '',
+          style: m['style'] ?? '',
+          season: m['season'] ?? '',
+          color: m['color'] ?? '',
+          imagePath: m['imagePath'] ?? '',
+        );
+      }).toList();
+    } else {
+      // Backward-compat: map by imagePath against mock list
+      final List<String> itemPaths =
+          List<String>.from(data['itemImagePaths'] ?? data['itemPaths'] ?? []);
+      items = MockItems.list.where((item) => itemPaths.contains(item.imagePath)).toList();
+    }
 
     return Outfit(
       id: doc.id,
@@ -215,6 +260,16 @@ class FirestoreService {
       'imagePath': imagePath,
       'imageStoragePath': imageStoragePath,
       'itemImagePaths': items.map((e) => e.imagePath).toList(),
+      'items': items.map((e) {
+        return {
+          'name': e.name,
+          'category': e.category,
+          'style': e.style,
+          'season': e.season,
+          'color': e.color,
+          'imagePath': e.imagePath,
+        };
+      }).toList(),
     });
 
     return ref;

@@ -38,158 +38,143 @@ class _PlannerPageState extends State<PlannerPage> {
       ),
 
       body: SafeArea(
-        child: SingleChildScrollView(
+        child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // === GÜN İSİMLERİ ===
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: days.map((d) {
-                  return Expanded(
-                    child: Center(
-                      child: Text(
-                        d,
-                        style: textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: scheme.onBackground,
-                        ),
+          children: [
+            // === GÜN İSİMLERİ ===
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: days.map((d) {
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      d,
+                      style: textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: scheme.onBackground,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                  ),
+                );
+              }).toList(),
+            ),
 
-              const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-              // === FIREBASE GRID (Takvim) ===
-              StreamBuilder<List<PlannerEntry>>(
-                stream: plannerProvider.plannerEntriesStream,
-                builder: (context, snapshot) {
-
-                  // Veritabanından gelen veriyi kolay erişim için Map'e çeviriyoruz
-                  // Key: gridIndex, Value: PlannerEntry
-                  Map<int, PlannerEntry> filledSlots = {};
-                  if (snapshot.hasData) {
-                    for (var entry in snapshot.data!) {
-                      filledSlots[entry.gridIndex] = entry;
-                    }
+            // === FIREBASE GRID (Takvim) ===
+            StreamBuilder<List<PlannerEntry>>(
+              stream: plannerProvider.plannerEntriesStream,
+              builder: (context, snapshot) {
+                Map<int, PlannerEntry> filledSlots = {};
+                if (snapshot.hasData) {
+                  for (var entry in snapshot.data!) {
+                    filledSlots[entry.gridIndex] = entry;
                   }
+                }
 
-                  return GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
-                      mainAxisSpacing: 6,
-                      crossAxisSpacing: 6,
-                    ),
-                    itemCount: 28,
-                    itemBuilder: (context, index) {
-                      final entry = filledSlots[index];
+                return GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 7,
+                    mainAxisSpacing: 6,
+                    crossAxisSpacing: 6,
+                  ),
+                  itemCount: 28,
+                  itemBuilder: (context, index) {
+                    final entry = filledSlots[index];
 
-                      return DragTarget<Outfit>(
-                        onAccept: (Outfit outfit) {
-                          // Mock Outfit'i Firebase'e kaydet
-                          plannerProvider.assignOutfitToDay(index, outfit);
-                        },
-                        
-                        builder: (context, candidate, rejected) {
-                          final bool isHovering = candidate.isNotEmpty;
+                    return DragTarget<Outfit>(
+                      onAccept: (Outfit outfit) {
+                        plannerProvider.assignOutfitToDay(index, outfit);
+                      },
+                      builder: (context, candidate, rejected) {
+                        final bool isHovering = candidate.isNotEmpty;
 
-                          return GestureDetector(
-                            onTap: () {
-                              // Tıklayınca sil (Firebase'den)
-                              if (entry != null) {
-                                plannerProvider.removeOutfitFromDay(index);
-                              }
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: isHovering
-                                    ? scheme.primaryContainer.withOpacity(0.4)
-                                    : scheme.surface,
-                                border: Border.all(
-                                  color: scheme.outlineVariant,
-                                ),
-                                borderRadius: BorderRadius.circular(10),
-                                // Eğer Firebase'de veri varsa resmini göster
-                                image: entry != null && entry.outfitImagePath.isNotEmpty
-                                    ? DecorationImage(
-                                  image: entry.outfitImagePath.startsWith('http')
-                                      ? NetworkImage(entry.outfitImagePath)
-                                      : AssetImage(entry.outfitImagePath) as ImageProvider,
-                                  fit: BoxFit.cover,
-                                )
-                                    : null,
+                        return GestureDetector(
+                          onTap: () {
+                            if (entry != null) {
+                              plannerProvider.removeOutfitFromDay(index);
+                            }
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: isHovering
+                                  ? scheme.primaryContainer.withOpacity(0.4)
+                                  : scheme.surface,
+                              border: Border.all(
+                                color: scheme.outlineVariant,
                               ),
-                              padding: const EdgeInsets.all(3),
-                              // Eğer resim yüklenemezse veya yoksa ikon göster
-                              child: entry == null
-                                  ? const SizedBox.shrink()
+                              borderRadius: BorderRadius.circular(10),
+                              image: entry != null && entry.outfitImagePath.isNotEmpty
+                                  ? DecorationImage(
+                                      image: entry.outfitImagePath.startsWith('http')
+                                          ? NetworkImage(entry.outfitImagePath)
+                                          : AssetImage(entry.outfitImagePath) as ImageProvider,
+                                      fit: BoxFit.cover,
+                                    )
                                   : null,
                             ),
-                          );
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                "Saved Outfits",
-                style: textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: scheme.onBackground,
-                ),
-              ),
-
-              const SizedBox(height: 10),
-
-              // === MOCK OUTFIT LISTESI (Sürüklenecek Kaynak) ===
-              SizedBox(
-                height: 300,
-                child: StreamBuilder<List<Outfit>>(
-                  stream: context.watch<OutfitsProvider>().outfitsStream,
-                  builder: (context, snapshot) {
-                    final outfits = snapshot.data ?? const [];
-
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-
-                    if (outfits.isEmpty) {
-                      return Center(
-                        child: Text(
-                          'No outfits yet',
-                          style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
-                        ),
-                      );
-                    }
-
-                    return ListView.builder(
-                      itemCount: outfits.length,
-                      itemBuilder: (context, index) {
-                        final outfit = outfits[index];
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: OutfitItem(
-                            outfit: outfit,
-                            draggable: true,
-                            compact: false,
+                            padding: const EdgeInsets.all(3),
+                            child: entry == null ? const SizedBox.shrink() : null,
                           ),
                         );
                       },
                     );
                   },
-                ),
+                );
+              },
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Saved Outfits",
+              style: textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: scheme.onBackground,
               ),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 10),
+
+            StreamBuilder<List<Outfit>>(
+              stream: context.watch<OutfitsProvider>().outfitsStream,
+              builder: (context, snapshot) {
+                final outfits = snapshot.data ?? const <Outfit>[];
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (outfits.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'No outfits yet',
+                      style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                    ),
+                  );
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: outfits.length,
+                  itemBuilder: (context, index) {
+                    final outfit = outfits[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 10),
+                      child: OutfitItem(
+                        outfit: outfit,
+                        draggable: true,
+                        compact: false,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

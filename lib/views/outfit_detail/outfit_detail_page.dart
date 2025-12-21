@@ -231,6 +231,26 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     foregroundColor: scheme.onError,
                   ),
                   onPressed: () async {
+                    final confirm = await showDialog<bool>(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        title: const Text("Delete Outfit"),
+                        content: const Text("Are you sure you want to delete this outfit?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, false),
+                            child: const Text("Cancel"),
+                          ),
+                          TextButton(
+                            onPressed: () => Navigator.pop(ctx, true),
+                            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                          ),
+                        ],
+                      ),
+                    );
+
+                    if (confirm != true) return;
+
                     if (outfit.id != null) {
                       await context.read<OutfitsProvider>().deleteOutfit(
                             outfitId: outfit.id!,

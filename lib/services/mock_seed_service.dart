@@ -65,6 +65,16 @@ class MockSeedService {
         'imagePath': outfit.imagePath, // asset path
         'imageStoragePath': null,
         'itemImagePaths': outfit.items.map((e) => e.imagePath).toList(),
+        'items': outfit.items.map((e) {
+          return {
+            'name': e.name,
+            'category': e.category,
+            'style': e.style,
+            'season': e.season,
+            'color': e.color,
+            'imagePath': e.imagePath,
+          };
+        }).toList(),
       });
     }
     await batch.commit();

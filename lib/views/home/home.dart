@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cs_310_project/services/firestore_service.dart';
 
 class OutfitlyHomePage extends StatefulWidget {
   const OutfitlyHomePage({super.key});
@@ -10,26 +10,12 @@ class OutfitlyHomePage extends StatefulWidget {
 }
 
 class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
+  final FirestoreService _service = FirestoreService();
+
   @override
   void initState() {
     super.initState();
-    _ensureUserDoc();
-  }
-
-  Future<void> _ensureUserDoc() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user == null) return;
-
-    final ref = FirebaseFirestore.instance.collection("users").doc(user.uid);
-    final snap = await ref.get();
-
-    if (!snap.exists) {
-      await ref.set({
-        "uid": user.uid,
-        "email": user.email ?? "",
-        "createdAt": FieldValue.serverTimestamp(),
-      });
-    }
+    _service.ensureUserDoc();
   }
 
   @override
@@ -44,8 +30,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
       );
     }
 
-    final userDocStream =
-    FirebaseFirestore.instance.collection("users").doc(user.uid).snapshots();
+    final userDocStream = _service.userDocStream();
 
     return Scaffold(
       backgroundColor: scheme.background,
@@ -108,7 +93,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
             const SizedBox(height: 24),
 
             // ✅ Firestore real-time gösterimi (backend kanıtı) — crash-proof
-            StreamBuilder<DocumentSnapshot>(
+            StreamBuilder(
               stream: userDocStream,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {

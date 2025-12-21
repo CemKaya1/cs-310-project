@@ -144,6 +144,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
+                  if (!mounted) return;
+                  // Return to root so the auth gate can show LoginPage.
+                  Navigator.of(context).popUntil((route) => route.isFirst);
                 },
                 child: const Text(
                   "Log Out",
