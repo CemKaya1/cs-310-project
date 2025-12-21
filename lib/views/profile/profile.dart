@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
@@ -26,6 +27,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: scheme.background,
@@ -39,7 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
-
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
@@ -50,9 +51,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             CircleAvatar(
               radius: 48,
               backgroundColor: scheme.primaryContainer,
-              child: Image.network("https://cdn-icons-png.flaticon.com/512/6325/6325109.png"),
-              
-              //Icon(Icons.person, size: 48, color: scheme.primary),
+              child: Image.network(
+                "https://cdn-icons-png.flaticon.com/512/6325/6325109.png",
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -65,6 +66,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: scheme.onBackground,
               ),
             ),
+
+
+            if (user?.email != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                user!.email!,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: scheme.onBackground.withOpacity(0.7),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 32),
 
@@ -110,7 +123,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const Spacer(),
 
-            // LOG OUT
+            //LOG OUT (Firebase)
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -119,11 +132,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
                 ),
-                onPressed: () {
-                  Navigator.pushNamedAndRemoveUntil(
-                      context, "/login", (route) => false);
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
                 },
                 child: const Text(
                   "Log Out",
