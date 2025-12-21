@@ -1,3 +1,4 @@
+import 'firebase_options.dart';
 import 'package:cs_310_project/views/my_closet/closet_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -8,13 +9,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/views/planner/planner_provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
 
-// MODIFIED START: Added app-level providers below to wire auth and page-specific providers.
-// These were added to integrate Firebase Auth, login/register logic and item creator
-// without changing the existing UI structure.
 import 'package:cs_310_project/views/login_register/login_register_provider.dart';
 import 'package:cs_310_project/views/item_creator/item_creator_provider.dart';
-// MODIFIED END: app-level provider imports
-
 
 // MAIN SCREENS
 import 'package:cs_310_project/views/login_register/login_register.dart';
@@ -37,27 +33,24 @@ import 'package:cs_310_project/views/planner/planner_page.dart';
 // BOTTOM NAV
 import 'package:cs_310_project/widgets/bottom_nav_bar.dart';
 
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   runApp(
     MultiProvider(
-  // MODIFIED START: registered new providers here. Kept existing providers unchanged
-  // to avoid breaking other pages.
       providers: [
-  // app-wide providers
-  // MODIFIED: AuthProvider removed; Login/Register provider now exposes auth helpers
-  ChangeNotifierProvider(create: (_) => LoginRegisterProvider()),
+        ChangeNotifierProvider(create: (_) => LoginRegisterProvider()),
         ChangeNotifierProvider(create: (_) => ItemCreatorProvider()),
-
-        // existing providers
         ChangeNotifierProvider(create: (_) => PlannerProvider()),
         ChangeNotifierProvider(create: (_) => ClosetProvider()),
         ChangeNotifierProvider(create: (_) => OutfitsProvider()),
-  ],
-  // MODIFIED END: provider registrations
-  child: const OutfitlyApp(),
+      ],
+      child: const OutfitlyApp(),
     ),
   );
 }
@@ -70,11 +63,28 @@ class OutfitlyApp extends StatefulWidget {
 }
 
 class _OutfitlyAppState extends State<OutfitlyApp> {
-
   // ---------- Dark Mode ----------
   ThemeMode _themeMode = ThemeMode.light;
+  static const _prefKey = "isDarkMode";
 
-  void _toggleDarkMode(bool enabled) {
+  @override
+  void initState() {
+    super.initState();
+    _loadTheme();
+  }
+
+  Future<void> _loadTheme() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isDark = prefs.getBool(_prefKey) ?? false;
+    setState(() {
+      _themeMode = isDark ? ThemeMode.dark : ThemeMode.light;
+    });
+  }
+
+  void _toggleDarkMode(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_prefKey, enabled);
+
     setState(() {
       _themeMode = enabled ? ThemeMode.dark : ThemeMode.light;
     });
@@ -94,14 +104,12 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
     setState(() => _selectedIndex = index);
   }
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Outfitly',
 
-      // ---------- Themes ----------
       themeMode: _themeMode,
       theme: ThemeData(
         textTheme: GoogleFonts.poppinsTextTheme(),
@@ -120,47 +128,34 @@ class _OutfitlyAppState extends State<OutfitlyApp> {
         useMaterial3: true,
       ),
 
-      // ---------- Named Routes ----------
       routes: {
         "/login": (context) => const LoginPage(),
-
-        //  HOME route'u YOK artık — eskisi gibi widgetOptions üzerinden gidiyoruz
-
         "/profile": (context) => ProfileScreen(
           isDarkModeEnabled: _themeMode == ThemeMode.dark,
           onDarkModeChanged: _toggleDarkMode,
         ),
-
         "/my_closet": (context) => const MyClosetPage(),
         "/item_creator": (context) => const ItemCreatorPage(),
         "/item_detail": (context) => const ItemDetailPage(),
-
         "/my_outfits": (context) => const MyOutfitPage(),
         "/outfit_creator": (context) => const OutfitCreatorPage(),
         "/outfit_detail": (context) => const OutfitDetailPage(),
-
         "/planner": (context) => const PlannerPage(),
       },
 
-      // ---------- ROOT: Auth Gate ----------
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
         builder: (context, snapshot) {
-          final user = snapshot.data;
-
-          // While waiting, show a minimal placeholder (keeps app responsive).
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
               body: Center(child: CircularProgressIndicator()),
             );
           }
 
-          // Logged out -> Login/Register
-          if (user == null) {
+          if (snapshot.data == null) {
             return const LoginPage();
           }
 
-          // Logged in -> Bottom Nav + Main Pages
           return Scaffold(
             bottomNavigationBar: OutfitlyBottomNavBar(
               currentIndex: _selectedIndex,
