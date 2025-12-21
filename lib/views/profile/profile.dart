@@ -25,6 +25,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
+  void didUpdateWidget(covariant ProfileScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.isDarkModeEnabled != widget.isDarkModeEnabled) {
+      setState(() => _isDarkMode = widget.isDarkModeEnabled);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final user = FirebaseAuth.instance.currentUser;
@@ -66,7 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: scheme.onBackground,
               ),
             ),
-
 
             if (user?.email != null) ...[
               const SizedBox(height: 6),
@@ -123,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const Spacer(),
 
-            //LOG OUT (Firebase)
+            // LOG OUT
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
