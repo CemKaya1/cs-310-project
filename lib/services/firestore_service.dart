@@ -31,6 +31,7 @@ class FirestoreService {
     await ref.set({
       'uid': uid,
       'email': user?.email ?? '',
+      'createdBy': uid,
       'createdAt': FieldValue.serverTimestamp(),
     });
   }
