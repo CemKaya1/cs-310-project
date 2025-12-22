@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cs_310_project/core/mock/mock_items.dart';
-import 'package:cs_310_project/core/mock/mock_outfits.dart';
+import 'package:cs_310_project/models/item_model.dart';
 
 /// Seeds mock items/outfits into Firestore for the current user
 /// if their collections are empty. Runs per-login.
@@ -10,6 +9,55 @@ class MockSeedService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   String? get _uid => _auth.currentUser?.uid;
+
+  // Static seed data (do not use runtime MockItems.list / MockOutfits.list).
+  static final List<ClosetItemModel> _seedItems = [
+    ClosetItemModel(
+      name: "Black T-Shirt",
+      category: "Top",
+      style: "Casual",
+      season: "Summer",
+      color: "Black",
+      imagePath: "lib/core/mock/mock_images/black_tshirt.jpg",
+    ),
+    ClosetItemModel(
+      name: "Blue T-Shirt",
+      category: "Top",
+      style: "Casual",
+      season: "Summer",
+      color: "Blue",
+      imagePath: "lib/core/mock/mock_images/blue_tshirt.jpg",
+    ),
+    ClosetItemModel(
+      name: "Black Jeans",
+      category: "Bottom",
+      style: "Classic",
+      season: "All",
+      color: "Black",
+      imagePath: "lib/core/mock/mock_images/black_jean.jpg",
+    ),
+    ClosetItemModel(
+      name: "Blue Jeans",
+      category: "Bottom",
+      style: "Classic",
+      season: "All",
+      color: "Blue",
+      imagePath: "lib/core/mock/mock_images/blue_jean.jpg",
+    ),
+  ];
+
+  static final List<({String name, List<ClosetItemModel> items, String imagePath})> _seedOutfits = [
+    (
+      name: "Casual Blue",
+      items: [_seedItems[1], _seedItems[3]],
+      imagePath: "lib/core/mock/mock_images/blue_tshirt.jpg"
+    ),
+    (
+      name: "Street Black",
+      items: [_seedItems[0], _seedItems[2]],
+      imagePath: "lib/core/mock/mock_images/black_tshirt.jpg"
+    ),
+  ];
 
   CollectionReference<Map<String, dynamic>> _itemsCol(String uid) =>
       _db.collection('users').doc(uid).collection('items');
@@ -31,7 +79,7 @@ class MockSeedService {
     if (snap.docs.isNotEmpty) return;
 
     final batch = _db.batch();
-    for (final item in MockItems.list) {
+    for (final item in _seedItems) {
       final ref = col.doc();
       batch.set(ref, {
         'id': ref.id,
@@ -55,7 +103,7 @@ class MockSeedService {
     if (snap.docs.isNotEmpty) return;
 
     final batch = _db.batch();
-    for (final outfit in MockOutfits.list) {
+    for (final outfit in _seedOutfits) {
       final ref = col.doc();
       batch.set(ref, {
         'id': ref.id,
