@@ -38,9 +38,11 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
       setState(() => outfit.name = newName);
 
       if (outfit.id != null) {
-        await context
-            .read<OutfitsProvider>()
-            .updateOutfitName(outfitId: outfit.id!, name: newName);
+        await context.read<OutfitsProvider>().updateOutfit(
+              outfitId: outfit.id!,
+              name: newName,
+              items: outfit.items,
+            );
       }
 
       ScaffoldMessenger.of(context).showSnackBar(

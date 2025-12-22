@@ -283,6 +283,30 @@ class FirestoreService {
     });
   }
 
+  Future<void> updateOutfit({
+    required String outfitId,
+    required String name,
+    required List<ClosetItemModel> items,
+  }) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+
+    await _db.collection('users').doc(uid).collection('outfits').doc(outfitId).update({
+      'name': name,
+      'itemImagePaths': items.map((e) => e.imagePath).toList(),
+      'items': items.map((e) {
+        return {
+          'name': e.name,
+          'category': e.category,
+          'style': e.style,
+          'season': e.season,
+          'color': e.color,
+          'imagePath': e.imagePath,
+        };
+      }).toList(),
+    });
+  }
+
   Future<void> deleteOutfit({required String outfitId, String? imageStoragePath}) async {
     final uid = currentUserId;
     if (uid == null) throw Exception('Not authenticated');

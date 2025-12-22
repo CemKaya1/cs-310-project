@@ -39,6 +39,15 @@ class OutfitsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> updateOutfit({
+    required String outfitId,
+    required String name,
+    required List<ClosetItemModel> items,
+  }) async {
+    await _service.updateOutfit(outfitId: outfitId, name: name, items: items);
+    notifyListeners();
+  }
+
   Future<void> deleteOutfit({required String outfitId, String? imageStoragePath}) async {
     await _service.deleteOutfit(outfitId: outfitId, imageStoragePath: imageStoragePath);
     notifyListeners();
