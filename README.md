@@ -15,7 +15,40 @@ Outfitly addresses the timeless problem of "I have a closet full of clothes, but
 - **Cem Kaya** – 31957                 (Documentation & Submission Lead )
 - **Mete Yılmazbaş** – 34349           (Presentation & Communication Lead)
 
+## Features 
+- User authentication with Firebase Auth
+- Digitize and manage personal wardrobe items
+- Create and save outfit combinations
+- Light/Dark mode support
+- Real-time data synchronization with Firestore
+- Unit and widget tested for reliability
+
+## Tech Stack
+- Flutter (Dart)
+- Firebase Authentication
+- Cloud Firestore
+- Firebase Storage
+- Provider (state management)
+
+
+## Architecture
+Outfitly follows a feature-based Flutter architecture combined with Provider
+for state management.
+
+- UI layer: `views/`
+- Business logic: `providers/`
+- Data layer: `services/`
+- Data models: `models/`
+
+## Firebase Integration
+- User authentication is handled via Firebase Auth
+- Each user has a corresponding Firestore document
+- Outfit and closet data are stored in Firestore collections
+- Images are uploaded and retrieved via Firebase Storage
+
 ## Testing
+
+The project includes both unit tests and widget tests to ensure data integrity, UI correctness, and navigation flow.
 
 The test `closet_item_model_test.dart` verifies that data retrieved from Firestore is correctly mapped into the item model and that a default placeholder image is used when the `imageUrl` field is missing, ensuring robustness against incomplete data.
 
@@ -29,3 +62,4 @@ The test `my_outfit_add_widget_test.dart` verifies that tapping the add outfit b
 ## How to Run Tests
 
 Before running the tests, project dependencies are fetched using `flutter pub get`. The unit tests are executed individually using `flutter test test/closet_item_model_test.dart` and `flutter test test/outfits_provider_add_test.dart` to verify core application logic. The widget tests are then run using `flutter test test/login_page_test.dart` and `flutter test test/my_outfit_add_widget_test.dart` to validate user interface behavior and interactions. Finally, all tests can be executed together using the `flutter test` command, which runs the entire test suite and confirms that all tests pass successfully.
+
