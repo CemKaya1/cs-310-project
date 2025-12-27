@@ -54,8 +54,8 @@ It achieves this by:
    cd cs_310_project
 
 4. Install dependencies:
-
-  flutter pub get
+   ```bash
+   flutter pub get
 
 5. Configure Firebase:
    
@@ -64,8 +64,8 @@ It achieves this by:
 -Add the Firebase configuration files (google-services.json / GoogleService-Info.plist)
 
 6. Run the application:
- 
- flutter run
+   ```bash
+   flutter run
 
 ## Testing
 
