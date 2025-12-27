@@ -91,7 +91,11 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                  TextField(
                   controller: _nameController,
                   textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                   decoration: const InputDecoration(border: UnderlineInputBorder()),
                 )
               else
