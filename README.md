@@ -59,9 +59,9 @@ It achieves this by:
 
 6. Configure Firebase:
    
--Create a Firebase project
--Enable Authentication and Cloud Firestore
--Add the Firebase configuration files (google-services.json / GoogleService-Info.plist)
+- Create a Firebase project
+- Enable Authentication and Cloud Firestore
+- Add the Firebase configuration files (google-services.json / GoogleService-Info.plist)
 
 6. Run the application:
    ```bash
