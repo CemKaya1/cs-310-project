@@ -44,27 +44,27 @@ It achieves this by:
 ## Setup & Run Instructions
 
 1. Install Flutter (recommended version: latest stable)
-2. 
-3. Clone the repository:
+   
+2. Clone the repository:
     ```bash
    git clone <repository-url>
     
-4. Navigate to the project directory:
-   
+3. Navigate to the project directory:
+  ```bash
   cd cs_310_project
 
-6. Install dependencies:
-   
+4. Install dependencies:
+  ```bash
   flutter pub get
 
-7. Configure Firebase:
+5. Configure Firebase:
    
 -Create a Firebase project
 -Enable Authentication and Cloud Firestore
 -Add the Firebase configuration files (google-services.json / GoogleService-Info.plist)
 
-9. Run the application:
-   
+6. Run the application:
+ ```bash
  flutter run
 
 ## Testing
