@@ -46,7 +46,7 @@ It achieves this by:
 1. Install Flutter (recommended version: latest stable)
    
 2. Clone the repository:
-    ```bash
+   ```bash
    git clone <repository-url>
     
 3. Navigate to the project directory:
