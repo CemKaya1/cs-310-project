@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+//Profil ayarları ekranı
+//Dark mode state'i parent widget'tan gelir
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({
     super.key,
@@ -8,7 +10,10 @@ class ProfileScreen extends StatefulWidget {
     required this.onDarkModeChanged,
   });
 
+  //Dark modun açılıp açılmadığını kontrol eden bool value
   final bool isDarkModeEnabled;
+
+  //Dark mode değiştiğinde parent'a haber veren callback
   final ValueChanged<bool> onDarkModeChanged;
 
   @override
@@ -16,17 +21,22 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  //Switch için lokal dark mode state'i
   late bool _isDarkMode;
 
   @override
   void initState() {
     super.initState();
+
     _isDarkMode = widget.isDarkModeEnabled;
   }
 
   @override
   void didUpdateWidget(covariant ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    //Parent widget dark mode değerini değiştirdiyse
+    //bu ekranın state'ini de güncelle
     if (oldWidget.isDarkModeEnabled != widget.isDarkModeEnabled) {
       setState(() => _isDarkMode = widget.isDarkModeEnabled);
     }
@@ -34,11 +44,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    //Tema renkleri
     final scheme = Theme.of(context).colorScheme;
+
+    //Firebase'deki giriş yapmış kullanıcı
     final user = FirebaseAuth.instance.currentUser;
 
     return Scaffold(
       backgroundColor: scheme.background,
+
+      //Üst bar
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -49,23 +64,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
           style: TextStyle(fontWeight: FontWeight.w600),
         ),
       ),
+
+      //Sayfa içeriği
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: Column(
           children: [
             const SizedBox(height: 32),
 
-            // Profile photo
+            //Profil fotoğrafı
             CircleAvatar(
               radius: 48,
               backgroundColor: scheme.primaryContainer,
               child: Image.network(
                 "https://cdn-icons-png.flaticon.com/512/6325/6325109.png",
+
+                //İnternet hatası olursa ikon göster
+                errorBuilder: (context, error, stackTrace) {
+                  return Icon(
+                    Icons.person,
+                    size: 40,
+                    color: scheme.onPrimaryContainer,
+                  );
+                },
               ),
             ),
 
             const SizedBox(height: 16),
 
+            //Kullanıcı rolü / sabit başlık
             Text(
               "Fashion Enthusiast",
               style: TextStyle(
@@ -75,6 +102,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
+            //Kullanıcının emaili varsa göster
             if (user?.email != null) ...[
               const SizedBox(height: 6),
               Text(
@@ -88,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
             const SizedBox(height: 32),
 
-            // Dark Mode Toggle
+            //Dark Mode ayar kutusu
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               decoration: BoxDecoration(
@@ -106,6 +134,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.nights_stay_outlined, color: scheme.onSurface),
                   const SizedBox(width: 12),
+
+                  //Dark mode yazısı
                   Expanded(
                     child: Text(
                       "Dark Mode",
@@ -116,21 +146,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                   ),
+
                   Switch(
                     value: _isDarkMode,
                     activeColor: scheme.primary,
                     onChanged: (val) {
+                      //Lokal state güncellenir
                       setState(() => _isDarkMode = val);
+
+                      //Parent widget'a haber verilir
                       widget.onDarkModeChanged(val);
                     },
                   ),
                 ],
               ),
             ),
-
+            //Sayfanın kalan kısmını boşluk ile kaplar, alt widget aşağı iner
             const Spacer(),
 
-            // LOG OUT
+            //Log out butonu
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -143,10 +177,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 onPressed: () async {
+                  //Firebase çıkışı
                   await FirebaseAuth.instance.signOut();
+
+                  //Widget yok edildiyse işlem yapma
                   if (!mounted) return;
-                  // Return to root so the auth gate can show LoginPage.
-                  Navigator.of(context).popUntil((route) => route.isFirst);
+
+                  //Login ekranına dön
+                  Navigator.of(context)
+                      .popUntil((route) => route.isFirst);
                 },
                 child: const Text(
                   "Log Out",
