@@ -46,16 +46,16 @@ It achieves this by:
 1. Install Flutter (recommended version: latest stable)
    
 2. Clone the repository:
-  ```bash
-  git clone <repository-url>
+   ```bash
+   git clone <repository-url>
     
 4. Navigate to the project directory:
-  ```bash
-  cd cs_310_project
+   ```bash
+   cd cs_310_project
 
 4. Install dependencies:
-  ```bash
-  flutter pub get
+   ```bash
+   flutter pub get
 
 6. Configure Firebase:
    
@@ -64,8 +64,8 @@ It achieves this by:
 -Add the Firebase configuration files (google-services.json / GoogleService-Info.plist)
 
 6. Run the application:
-  ```bash
-  flutter run
+   ```bash
+   flutter run
 
 ## Testing
 
