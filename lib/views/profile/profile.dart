@@ -180,7 +180,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   //Firebase çıkışı
                   await FirebaseAuth.instance.signOut();
 
-                  //Widget yok edildiyse işlem yapma
                   if (!mounted) return;
 
                   //Login ekranına dön
@@ -201,3 +200,4 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
+
