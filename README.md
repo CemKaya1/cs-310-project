@@ -50,15 +50,12 @@ It achieves this by:
 2. Clone the repository:
    ```bash
    git clone <repository-url>
-    
 4. Navigate to the project directory:
    ```bash
    cd cs_310_project
-
 4. Install dependencies:
    ```bash
    flutter pub get
-
 6. Configure Firebase:
    
 - Create a Firebase project
