@@ -30,15 +30,13 @@ Outfitly addresses the timeless problem of "I have a closet full of clothes, but
 - Firebase Storage
 - Provider (state management)
 
-
 ## Architecture
-Outfitly follows a feature-based Flutter architecture combined with Provider
-for state management.
+Outfitly follows a feature-based Flutter architecture.
 
-- UI layer: `views/`
-- Business logic: `providers/`
-- Data layer: `services/`
-- Data models: `models/`
+- UI Layer: `views/` (screens and widgets)
+- Data Layer: `services/` (Firebase Auth, Firestore, Storage)
+- Model Layer: `models/` (data mapping and validation)
+- State Handling: `StatefulWidget` and `StreamBuilder` with Firebase streams
 
 ## Firebase Integration
 - User authentication is handled via Firebase Auth
