@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/services/firestore_service.dart';
 
-//Ana sayfa widget'ı
+//Ana sayfa widgetı
 class OutfitlyHomePage extends StatefulWidget {
   const OutfitlyHomePage({super.key});
 
@@ -43,7 +43,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
     return Scaffold(
       backgroundColor: scheme.background,
-
+      //Üst bar
       appBar: AppBar(
         automaticallyImplyLeading: false, // geri tuşu olmasın
         backgroundColor: scheme.surface,
