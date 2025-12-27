@@ -25,6 +25,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
+  bool _saving = false;
 
   String _keyOf(ItemDoc it) => it.id;
 
@@ -94,7 +95,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                     foregroundColor: scheme.onSurface,
                     side: BorderSide(color: scheme.outlineVariant),
                   ),
-                  onPressed: () => Navigator.pop(context, false),
+                  onPressed: _saving ? null : () => Navigator.pop(context, false),
                   child: const Text('Cancel'),
                 ),
               ),
@@ -106,8 +107,14 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                     backgroundColor: scheme.primary,
                     foregroundColor: scheme.onPrimary,
                   ),
-                  onPressed: _onSave,
-                  child: const Text('Save'),
+                  onPressed: _saving ? null : _onSave,
+                  child: _saving
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Save'),
                 ),
               ),
             ],
@@ -260,6 +267,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   }
 
   Future<void> _onSave() async {
+    if (_saving) return;
+    setState(() => _saving = true);
 
     final selected =
     _items.where((it) => _selectedIds.contains(_keyOf(it))).toList();
@@ -268,6 +277,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please select at least one item')),
       );
+      if (mounted) setState(() => _saving = false);
       return;
     }
 
@@ -298,6 +308,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
           );
     } catch (_) {
       // şimdilik Firestore permission hatası yüzünden geri dönüş engellenmesin
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
 
     Navigator.of(context, rootNavigator: true).pop(true);

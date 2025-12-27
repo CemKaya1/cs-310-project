@@ -14,6 +14,7 @@ class OutfitDetailPage extends StatefulWidget {
 
 class _OutfitDetailPageState extends State<OutfitDetailPage> {
   bool isEditing = false;
+  bool _saving = false;
   late Outfit outfit;
   late TextEditingController _nameCtrl;
 
@@ -32,17 +33,20 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
   }
 
   Future<void> _saveChanges() async {
+    if (_saving) return;
     final newName = _nameCtrl.text.trim();
 
     if (newName.isNotEmpty) {
       setState(() => outfit.name = newName);
 
       if (outfit.id != null) {
+        setState(() => _saving = true);
         await context.read<OutfitsProvider>().updateOutfit(
               outfitId: outfit.id!,
               name: newName,
               items: outfit.items,
             );
+        if (mounted) setState(() => _saving = false);
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -212,7 +216,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
               children: [
                 OutlinedButton.icon(
                   onPressed: isEditing
-                      ? _saveChanges
+                      ? (_saving ? null : _saveChanges)
                       : () => setState(() => isEditing = true),
                   icon: Icon(
                     isEditing ? Icons.save : Icons.edit,
@@ -233,25 +237,40 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     foregroundColor: scheme.onError,
                   ),
                   onPressed: () async {
+                    if (_saving) return;
+                    setState(() => _saving = true);
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
+                        backgroundColor: scheme.surface,
+                        titleTextStyle: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        contentTextStyle: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 16,
+                        ),
                         title: const Text("Delete Outfit"),
                         content: const Text("Are you sure you want to delete this outfit?"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text("Cancel"),
+                            child: Text("Cancel", style: TextStyle(color: scheme.primary)),
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+                            child: Text("Delete", style: TextStyle(color: scheme.error)),
                           ),
                         ],
                       ),
                     );
 
-                    if (confirm != true) return;
+                    if (confirm != true) {
+                      if (mounted) setState(() => _saving = false);
+                      return;
+                    }
 
                     if (outfit.id != null) {
                       await context.read<OutfitsProvider>().deleteOutfit(

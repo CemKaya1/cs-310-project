@@ -312,7 +312,21 @@ class FirestoreService {
     final uid = currentUserId;
     if (uid == null) throw Exception('Not authenticated');
 
-    await _db.collection('users').doc(uid).collection('outfits').doc(outfitId).delete();
+    // Delete planner entries that reference this outfit
+    final plannerSnap = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('planner')
+        .where('outfitId', isEqualTo: outfitId)
+        .get();
+
+    final batch = _db.batch();
+    for (final doc in plannerSnap.docs) {
+      batch.delete(doc.reference);
+    }
+
+    batch.delete(_db.collection('users').doc(uid).collection('outfits').doc(outfitId));
+    await batch.commit();
 
     if (imageStoragePath != null && imageStoragePath.isNotEmpty) {
       try {

@@ -13,6 +13,7 @@ class ItemDetailPage extends StatefulWidget {
 
 class _ItemDetailPageState extends State<ItemDetailPage> {
   bool _isEditing = false;
+  bool _saving = false;
   late TextEditingController _nameController;
   late TextEditingController _categoryController;
   late TextEditingController _styleController;
@@ -95,7 +96,11 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               else
                 Text(
                   _nameController.text,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
 
               const SizedBox(height: 30),
@@ -113,7 +118,9 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () async {
+                        if (_saving) return;
                         if (_isEditing) {
+                          setState(() => _saving = true);
                           // Update Firestore
                           await context.read<ClosetProvider>().updateItem(item.id, {
                             'name': _nameController.text,
@@ -122,7 +129,11 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                             'season': _seasonController.text,
                             'color': _colorController.text,
                           });
-                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Updated!")));
+                          if (mounted) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(content: Text("Updated!")));
+                          }
+                          if (mounted) setState(() => _saving = false);
                         }
                         setState(() => _isEditing = !_isEditing);
                       },
@@ -134,15 +145,33 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () async {
+                        if (_saving) return;
+                        setState(() => _saving = true);
                         // Confirm deletion
                         bool? confirm = await showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
+                            backgroundColor: colorScheme.surface,
+                            titleTextStyle: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 20,
+                              fontWeight: FontWeight.w600,
+                            ),
+                            contentTextStyle: TextStyle(
+                              color: colorScheme.onSurface,
+                              fontSize: 16,
+                            ),
                             title: const Text("Delete Item"),
                             content: const Text("Are you sure you want to delete this item?"),
                             actions: [
-                              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text("Cancel")),
-                              TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text("Delete", style: TextStyle(color: Colors.red))),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, false),
+                                child: Text("Cancel", style: TextStyle(color: colorScheme.primary)),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx, true),
+                                child: Text("Delete", style: TextStyle(color: colorScheme.error)),
+                              ),
                             ],
                           ),
                         );
@@ -152,6 +181,8 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                           // The Seed service used 'imageUrl' for asset path.
                           await context.read<ClosetProvider>().deleteItem(item.id); 
                           Navigator.of(context).pop();
+                        } else {
+                          if (mounted) setState(() => _saving = false);
                         }
                       },
                       icon: const Icon(Icons.delete_outline),
@@ -169,19 +200,24 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
   }
 
   Widget _buildDetailField({required String label, required TextEditingController controller, required ThemeData theme}) {
+    final scheme = theme.colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        border: Border.all(color: theme.dividerColor),
+        border: Border.all(color: scheme.outline),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
         children: [
-          Text("$label: ", style: const TextStyle(fontWeight: FontWeight.bold)),
+          Text(
+            "$label: ",
+            style: TextStyle(fontWeight: FontWeight.bold, color: scheme.onSurface),
+          ),
           Expanded(
             child: TextField(
               controller: controller,
               enabled: _isEditing,
+              style: TextStyle(color: scheme.onSurface),
               decoration: const InputDecoration(border: InputBorder.none),
             ),
           ),

@@ -25,6 +25,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
+  bool _saving = false;
 
   Future<void> _pickImage() async {
     try {
@@ -46,7 +47,10 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
 
   void _saveItem() {
+    if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _saving = true);
 
   // MODIFIED START: get provider to persist data to Firestore (non-blocking UX)
   final provider = context.read<ItemCreatorProvider>();
@@ -83,6 +87,8 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
             SnackBar(content: Text('Failed to save to cloud: $e')),
           );
           Navigator.pop(context, true);
+        }).whenComplete(() {
+          if (mounted) setState(() => _saving = false);
         });
   // MODIFIED END
   }
@@ -224,7 +230,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                         children: [
                           Expanded(
                             child: OutlinedButton(
-                              onPressed: () => Navigator.pop(context, false),
+                              onPressed: _saving ? null : () => Navigator.pop(context, false),
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: scheme.onSurface,
                                 side: BorderSide(color: scheme.outlineVariant),
@@ -240,7 +246,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: ElevatedButton(
-                              onPressed: _saveItem,
+                              onPressed: _saving ? null : _saveItem,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: scheme.primary,
                                 foregroundColor: scheme.onPrimary,
@@ -250,7 +256,13 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              child: const Text("Save"),
+                              child: _saving
+                                  ? const SizedBox(
+                                      height: 16,
+                                      width: 16,
+                                      child: CircularProgressIndicator(strokeWidth: 2),
+                                    )
+                                  : const Text("Save"),
                             ),
                           ),
                         ],

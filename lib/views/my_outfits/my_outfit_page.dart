@@ -65,7 +65,7 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
             if (outfits.isEmpty) {
               return Center(
                 child: Text(
-                  "Henüz kombinin yok",
+                  "No outfits yet.",
                   style: textTheme.bodyLarge?.copyWith(
                     color: scheme.onBackground,
                     fontWeight: FontWeight.w500,

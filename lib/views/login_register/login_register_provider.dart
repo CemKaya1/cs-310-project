@@ -34,7 +34,6 @@ class LoginRegisterProvider extends ChangeNotifier {
     try {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
       await _saveLastEmail(email);
-      await _seed.seedIfEmpty();
       return true;
     } on FirebaseAuthException catch (e) {
       _error = e.message ?? e.code;

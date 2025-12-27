@@ -19,21 +19,21 @@ class _MyClosetPageState extends State<MyClosetPage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        centerTitle: true,
+        backgroundColor: colorScheme.surface,
+        title: Text(
+          "My Closet",
+          style: TextStyle(
+            fontSize: 24,
+            color: colorScheme.onSurface,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
       body: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 80, bottom: 20),
-            child: Center(
-              child: Text(
-                "My Closet",
-                style: TextStyle(
-                  fontSize: 24,
-                  color: colorScheme.onSurface,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
           Expanded(
             // Listen to the stream from Provider
             child: StreamBuilder<List<ItemDoc>>(
