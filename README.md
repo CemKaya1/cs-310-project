@@ -19,8 +19,6 @@ It achieves this by:
 
 -Reducing daily stress and time spent choosing outfits
 
--Supporting sustainable fashion practices
-
 ### Group Members
 - **Ali Yılmaz** – 32281               (Project Coordinator)
 - **Zeynep Okkıran** – 32304           (Testing & Quality Assurance Lead )
