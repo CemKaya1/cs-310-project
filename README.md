@@ -50,8 +50,8 @@ It achieves this by:
    git clone <repository-url>
     
 3. Navigate to the project directory:
-  ```bash
-  cd cs_310_project
+   ```bash
+   cd cs_310_project
 
 4. Install dependencies:
 
