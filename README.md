@@ -6,7 +6,9 @@ OUTFITLY
 Outfitly is a smart wardrobe assistant mobile application developed using Flutter and Firebase.
 The motivation behind this project is to solve a common daily problem: having many clothes but struggling to decide what to wear. Outfitly helps users digitize their wardrobes, organize clothing items, and create outfit combinations in a simple and intuitive way.
 
-By providing outfit creation and suggestion features, the application saves time, and encourages users to make better use of their existing clothes. This approach also promotes more sustainable fashion habits by discouraging unnecessary purchases. Outfitly addresses the timeless problem of “I have a closet full of clothes, but nothing to wear.”
+By providing outfit creation and suggestion features, the application saves time, and encourages users to make better use of their existing clothes. This approach also promotes more sustainable fashion habits by discouraging unnecessary purchases. 
+
+Outfitly addresses the timeless problem of “I have a closet full of clothes, but nothing to wear.”
 It achieves this by:
 
 -Creating a searchable digital inventory of the user’s wardrobe
