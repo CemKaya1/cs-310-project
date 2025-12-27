@@ -3,6 +3,7 @@ import 'package:cs_310_project/models/item_doc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:io';
+import 'package:cs_310_project/services/firestore_service.dart';
 
 class ItemDetailPage extends StatefulWidget {
   const ItemDetailPage({super.key});
@@ -177,6 +178,8 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                         );
 
                         if (confirm == true) {
+                          await FirestoreService()
+                              .removeItemFromOutfits(itemImagePath: item.imageUrl);
                           // Note: If imagePath was stored in Firestore as 'imagePath', use it. 
                           // The Seed service used 'imageUrl' for asset path.
                           await context.read<ClosetProvider>().deleteItem(item.id); 

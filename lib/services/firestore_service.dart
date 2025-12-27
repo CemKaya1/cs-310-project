@@ -336,4 +336,44 @@ class FirestoreService {
       }
     }
   }
+
+  Future<void> removeItemFromOutfits({required String itemImagePath}) async {
+    final uid = currentUserId;
+    if (uid == null) throw Exception('Not authenticated');
+    if (itemImagePath.isEmpty) return;
+
+    final outfitsSnap = await _db
+        .collection('users')
+        .doc(uid)
+        .collection('outfits')
+        .get();
+
+    final batch = _db.batch();
+
+    for (final doc in outfitsSnap.docs) {
+      final data = doc.data();
+      final List<String> itemPaths =
+          List<String>.from(data['itemImagePaths'] ?? []);
+
+      final List<dynamic> itemsRaw = List<dynamic>.from(data['items'] ?? []);
+
+      final nextItemPaths = itemPaths.where((p) => p != itemImagePath).toList();
+      final nextItems = itemsRaw.where((raw) {
+        final map = raw as Map<String, dynamic>;
+        return map['imagePath'] != itemImagePath;
+      }).toList();
+
+      final changed = nextItemPaths.length != itemPaths.length ||
+          nextItems.length != itemsRaw.length;
+
+      if (changed) {
+        batch.update(doc.reference, {
+          'itemImagePaths': nextItemPaths,
+          'items': nextItems,
+        });
+      }
+    }
+
+    await batch.commit();
+  }
 }
