@@ -144,9 +144,9 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                 final data = raw is Map<String, dynamic> ? raw : null;
 
                 final email =
-                    (data?["email"] as String?) ?? //İlk önce Firestore'a bakılır
-                    user.email ?? //Firestore null ise FirebaseAuth'a bakılır
-                    "unknown"; //FirebaseAuth da null ise fallback
+                    (data?["email"] as String?) ?? //Firestore is checked first
+                    user.email ?? //If Firestore is null FirebaseAuth is checked
+                    "unknown"; //Fallback if FirebaseAuth is null
 
                 return Text(
                   "Logged in as: $email",
