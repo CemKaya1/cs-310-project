@@ -16,7 +16,7 @@ class ItemCreatorPage extends StatefulWidget {
 
 class _ItemCreatorPageState extends State<ItemCreatorPage> {
   final _formKey = GlobalKey<FormState>();
-
+  // Text controllers for form inputs
   final _nameCtrl = TextEditingController();
   final _categoryCtrl = TextEditingController();
   final _styleCtrl = TextEditingController();
@@ -25,8 +25,9 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
   final ImagePicker _picker = ImagePicker();
   XFile? _pickedImage;
-  bool _saving = false;
-
+  bool _saving = false; // Prevents duplicate submissions and shows loading UI
+  
+  // Opens the gallery to pick an image and updates local state
   Future<void> _pickImage() async {
     try {
       final XFile? img = await _picker.pickImage(
@@ -45,20 +46,19 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     }
   }
 
-
+  // Validates the form and triggers both local and remote data saving
   void _saveItem() {
     if (_saving) return;
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _saving = true);
 
-  // MODIFIED START: get provider to persist data to Firestore (non-blocking UX)
   final provider = context.read<ItemCreatorProvider>();
 
         final File? imageFile = _pickedImage != null ? File(_pickedImage!.path) : null;
         const String placeholderAsset = 'lib/core/mock/mock_images/white_placeholder.png';
 
-        // Keep adding to local mock list for immediate UI feedback (unchanged behavior)
+        // 1. Update local mock list for immediate UI feedback in the app
         final newItem = ClosetItemModel(
           name: _nameCtrl.text.trim(),
           category: _categoryCtrl.text.trim(),
@@ -69,9 +69,8 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
         );
 
         MockItems.list.insert(0, newItem);
-
-  // Also persist to Firestore via provider (real-time updates will flow via streams elsewhere)
-  // MODIFIED: provider.saveItem called to persist item document under users/{uid}/items
+    
+  // 2. Persist to Firestore via the Provider
   provider.saveItem(
           name: _nameCtrl.text.trim(),
           category: _categoryCtrl.text.trim(),
@@ -80,9 +79,9 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
           color: _colorCtrl.text.trim(),
           imageFile: imageFile,
         ).then((ok) {
-          Navigator.pop(context, true);
+          Navigator.pop(context, true); // Still pop even if cloud fail, as local is updated
         }).catchError((e) {
-          // If Firestore write fails, still close but show message
+          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Failed to save to cloud: $e')),
           );
@@ -90,7 +89,6 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
         }).whenComplete(() {
           if (mounted) setState(() => _saving = false);
         });
-  // MODIFIED END
   }
 
 
@@ -128,25 +126,19 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
           ),
         ),
       ),
-      // -------------------------------------
 
       body: SafeArea(
         child: Padding(
-          // Üstteki AppBar geldiği için dikey padding'i biraz azalttık veya ihtiyaca göre düzenledik
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              // ESKİ "Row" (Back button) BURADAN SİLİNDİ.
-
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
 
-                      //  Upload Image Title
                       Text(
                         "Upload Image",
                         style: textTheme.titleMedium?.copyWith(
@@ -157,7 +149,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 12),
 
-                      //  Upload Container
+                      // Image Selection Container
                       GestureDetector(
                         onTap: _pickImage,
                         child: Container(
@@ -205,7 +197,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 24),
 
-                      //  Form Fields
+                      // Item Details Form
                       Form(
                         key: _formKey,
                         child: Column(
@@ -225,7 +217,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
 
                       const SizedBox(height: 24),
 
-                      //  Cancel + Save Buttons
+                      // Action Buttons
                       Row(
                         children: [
                           Expanded(
@@ -279,7 +271,7 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
     );
   }
 
-  //  Form Field Component
+  // Reusable UI component for form text fields
   Widget _field(
       String label,
       TextEditingController ctrl,
@@ -312,3 +304,4 @@ class _ItemCreatorPageState extends State<ItemCreatorPage> {
   }
 
 }
+
