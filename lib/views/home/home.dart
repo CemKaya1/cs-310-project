@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/services/firestore_service.dart';
 
-//Ana sayfa widgetı
+//home page widget
 class OutfitlyHomePage extends StatefulWidget {
   const OutfitlyHomePage({super.key});
 
@@ -17,20 +17,20 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
   void initState() {
     super.initState();
 
-    //Kullanıcının Firestore'da bir dokümanı yoksa oluşturur
+    //If the user doesn't have a document in Firestore, it creates one.
     _service.ensureUserDoc();
   }
 
   @override
   Widget build(BuildContext context) {
-    //Tema renkleri
+    //Theme colors
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    //Giriş yapmış kullanıcıyı al
+    //Get logged-in user
     final user = FirebaseAuth.instance.currentUser;
 
-    //Eğer kullanıcı giriş yapmamışsa
+    //If the user is not logged in
     if (user == null) {
       return const Scaffold(
         body: Center(
@@ -38,14 +38,14 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
         ),
       );
     }
-    //Firestore'daki kullanıcı dokümanını gerçek zamanlı dinleyen stream
+    //A stream that listens to user documentation in Firestore in real time
     final userDocStream = _service.userDocStream();
 
     return Scaffold(
       backgroundColor: scheme.background,
-      //Üst bar
+      //Top bar
       appBar: AppBar(
-        automaticallyImplyLeading: false, // geri tuşu olmasın
+        automaticallyImplyLeading: false, //no back button
         backgroundColor: scheme.surface,
         elevation: 0,
         centerTitle: true,
@@ -58,7 +58,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
           ),
         ),
 
-        //Sağ üst profil ikonuna tıklayınca profile sayfasına gider
+        //Clicking the profile icon in the upper right corner takes you to the profile page
         actions: [
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, "/profile"),
@@ -68,7 +68,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                 radius: 18,
                 backgroundColor: scheme.primaryContainer,
 
-                //İnternetten alınan profil resmi (hata olursa ikon gösterir)
+                //Profile picture (shows an icon if there is an error)
                 child: Image.network(
                   "https://cdn-icons-png.flaticon.com/512/6325/6325109.png",
                   errorBuilder: (context, error, stackTrace) {
@@ -84,7 +84,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
         ],
       ),
 
-      //Sayfa içeriği
+      //Page content
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
@@ -99,7 +99,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
             const SizedBox(height: 8),
 
-            //Karşılama mesajı
+            //Welcome message
             Text("Welcome Back!",
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
@@ -109,7 +109,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
             const SizedBox(height: 12),
 
-            //Açıklama metni
+            //Explanatory text
             Text(
               "Organize your wardrobe and plan your perfect outfits",
               textAlign: TextAlign.center,
@@ -120,7 +120,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
             const SizedBox(height: 24),
 
-            //Firestore gerçek zamanlı veri gösterimi
+            //Firestore real-time data display
             StreamBuilder(
               stream: userDocStream,
               builder: (context, snapshot) {
@@ -129,7 +129,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                   return const CircularProgressIndicator();
                 }
 
-                //Veri yoksa
+                //If there is no data
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Text(
                     "Loading user...",
@@ -139,7 +139,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                   );
                 }
 
-                //Firestore verisini Map'e çevir
+                //Convert Firestore data to Map
                 final raw = snapshot.data!.data();
                 final data = raw is Map<String, dynamic> ? raw : null;
 
