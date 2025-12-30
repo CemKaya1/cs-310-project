@@ -20,7 +20,9 @@ class OutfitCreatorPage extends StatefulWidget {
 class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
   final _nameCtrl = TextEditingController();
 
+  // Tracks which item IDs are selected for the outfit
   final Set<String> _selectedIds = {};
+  // Local cache of items retrieved from the stream
   List<ItemDoc> _items = [];
 
   final ImagePicker _picker = ImagePicker();
@@ -126,7 +128,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
         children: [
-          // Upload Image
+          // Section: Main Outfit Image Upload
           GestureDetector(
             onTap: _pickImageFromGallery,
             child: Container(
@@ -170,7 +172,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
           const SizedBox(height: 12),
 
-          // Outfit Name input
+          // Section: Outfit Name Input
           TextField(
             controller: _nameCtrl,
             style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
@@ -200,6 +202,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
 
           const SizedBox(height: 12),
 
+          // Section: Item Selection List
           Container(
             decoration: BoxDecoration(
               color: scheme.surface,
@@ -217,7 +220,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                 }
 
                 final items = snapshot.data ?? const <ItemDoc>[];
-                _items = items;
+                _items = items; // Store for use in _onSave
 
                 if (items.isEmpty) {
                   return Padding(
@@ -230,7 +233,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
                 }
 
                 return ListView.separated(
-                  shrinkWrap: true,
+                  shrinkWrap: true, // Needed for ListView inside ListView
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: items.length,
                   separatorBuilder: (_, __) => Divider(
@@ -270,6 +273,7 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     if (_saving) return;
     setState(() => _saving = true);
 
+    // Filter the items list to get only the objects user selected
     final selected =
     _items.where((it) => _selectedIds.contains(_keyOf(it))).toList();
 
@@ -284,10 +288,12 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
     final name =
     _nameCtrl.text.trim().isEmpty ? 'New Outfit' : _nameCtrl.text.trim();
 
+    // Fallback logic: If no outfit image is taken, use the first selected item's image
     const String placeholderAsset = 'lib/core/mock/mock_images/white_placeholder.png';
     final String fallbackImagePath =
         selected.first.imageUrl.isNotEmpty ? selected.first.imageUrl : placeholderAsset;
 
+    // Convert ItemDoc (database model) to ClosetItemModel (outfit internal model)
     final selectedItems = selected.map((it) {
       return ClosetItemModel(
         name: it.name,
@@ -307,7 +313,8 @@ class _OutfitCreatorPageState extends State<OutfitCreatorPage> {
             localImageFilePath: _pickedImage?.path,
           );
     } catch (_) {
-      // şimdilik Firestore permission hatası yüzünden geri dönüş engellenmesin
+      // Errors are suppressed here to ensure navigation finishes, 
+      // though typically you'd handle specific DB errors.
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -375,6 +382,7 @@ class _ItemRow extends StatelessWidget {
     );
   }
 
+  /// Helper to handle different image source formats dynamically
   Widget _buildImage(String path, {required double width, required double height}) {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return Image.network(path, width: width, height: height, fit: BoxFit.cover);
