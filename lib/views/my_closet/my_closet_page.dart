@@ -35,23 +35,23 @@ class _MyClosetPageState extends State<MyClosetPage> {
       body: Column(
         children: [
           Expanded(
-            // Listen to the stream from Provider
+            // StreamBuilder keeps the UI in sync with the database in real-time
             child: StreamBuilder<List<ItemDoc>>(
               stream: context.read<ClosetProvider>().itemsStream,
               builder: (context, snapshot) {
-                // 1. Loading State
+                // Handle the initial connection state
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                // 2. Error State
+                // Display error message if the stream fails
                 if (snapshot.hasError) {
                   return Center(child: Text("Error: ${snapshot.error}"));
                 }
 
-                // 3. Data Check
                 final items = snapshot.data ?? [];
 
+                // Handle empty state (e.g., first-time users)
                 if (items.isEmpty) {
                   return Center(
                     child: Text(
@@ -61,16 +61,13 @@ class _MyClosetPageState extends State<MyClosetPage> {
                   );
                 }
 
-                // 4. List Display
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 10),
                   itemCount: items.length,
                   itemBuilder: (context, index) {
                     final ItemDoc item = items[index];
-                    
-                    // Determine image path (Network or Local asset fallback)
-                    // If your ItemDoc stores downloadUrl in 'imageUrl', use that.
-                    // If it's a mock item without URL, it might be empty.
+
+                    // Prioritize network URLs; fallback to local asset if null/empty
                     final displayImage = (item.imageUrl.isNotEmpty) 
                         ? item.imageUrl 
                         : "lib/core/mock/mock_images/white_placeholder.png"; 
@@ -79,7 +76,7 @@ class _MyClosetPageState extends State<MyClosetPage> {
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
                         onTap: () {
-                          // Pass the entire ItemDoc object to the detail page
+                          // Pass the specific item instance to the detail page via arguments
                           Navigator.pushNamed(
                             context,
                             "/item_detail",
@@ -101,6 +98,7 @@ class _MyClosetPageState extends State<MyClosetPage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // Wait for the result from ItemCreator to see if a new item was actually added
           final created = await Navigator.pushNamed(context, "/item_creator");
           if (created == true && context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
