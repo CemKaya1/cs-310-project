@@ -46,9 +46,11 @@ class _PlannerPageState extends State<PlannerPage> {
       ),
 
       body: SafeArea(
-        child: ListView(
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          children: [
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
             //Weekday headers
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -158,50 +160,49 @@ class _PlannerPageState extends State<PlannerPage> {
             const SizedBox(height: 10),
 
             //List of saved outfits from Firestore
-            StreamBuilder<List<Outfit>>(
-              stream: context.watch<OutfitsProvider>().outfitsStream,
-              builder: (context, snapshot) {
-                final outfits = snapshot.data ?? const <Outfit>[];
+            Expanded(
+              child: StreamBuilder<List<Outfit>>(
+                stream: context.watch<OutfitsProvider>().outfitsStream,
+                builder: (context, snapshot) {
+                  final outfits = snapshot.data ?? const <Outfit>[];
 
-                if (snapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator());
-                }
+                  if (snapshot.connectionState ==
+                      ConnectionState.waiting) {
+                    return const Center(
+                        child: CircularProgressIndicator());
+                  }
 
-                if (outfits.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No outfits yet',
-                      style: textTheme.bodyMedium
-                          ?.copyWith(color: scheme.onSurface),
-                    ),
-                  );
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  physics:
-                      const NeverScrollableScrollPhysics(),
-                  itemCount: outfits.length,
-                  itemBuilder: (context, index) {
-                    final outfit = outfits[index];
-                    return Padding(
-                      padding:
-                          const EdgeInsets.only(bottom: 10),
-                      child: OutfitItem(
-                        outfit: outfit,
-                        draggable: true,
-                        compact: false,
+                  if (outfits.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No outfits yet',
+                        style: textTheme.bodyMedium
+                            ?.copyWith(color: scheme.onSurface),
                       ),
                     );
-                  },
-                );
-              },
+                  }
+
+                  return ListView.builder(
+                    itemCount: outfits.length,
+                    itemBuilder: (context, index) {
+                      final outfit = outfits[index];
+                      return Padding(
+                        padding:
+                            const EdgeInsets.only(bottom: 10),
+                        child: OutfitItem(
+                          outfit: outfit,
+                          draggable: true,
+                          compact: false,
+                        ),
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
-    );
+    ));
   }
 }
