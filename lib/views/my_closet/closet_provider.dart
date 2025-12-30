@@ -2,25 +2,27 @@ import 'package:cs_310_project/models/item_doc_model.dart';
 import 'package:flutter/material.dart';
 import 'package:cs_310_project/services/database_service.dart';
 
+/// Manages the state and business logic for the user's closet items.
+/// Communicates directly with [DatabaseService] to reflect changes in Firestore.
 class ClosetProvider extends ChangeNotifier {
   final DatabaseService _db = DatabaseService();
 
-  // Returns a Stream of List<ItemDoc> from Firestore
+
+  // Provides a real-time connection to the items collection.
+  // UI components should use a StreamBuilder to listen to this getter.
   Stream<List<ItemDoc>> get itemsStream => _db.getItemsStream();
 
-  // Delete an item from Firestore
+  /// Deletes a specific item by its document ID.
   Future<void> deleteItem(String itemId) async {
     try {
       await _db.deleteItem(itemId);
-      // No need to notifyListeners() manually because the Stream 
-      // in MyClosetPage will automatically detect the deletion.
     } catch (e) {
       debugPrint("Error deleting item: $e");
-      rethrow;
+      rethrow; // Pass error to the UI for snackbar/alert handling
     }
   }
 
-  // Update item details in Firestore
+  /// Updates specific fields of an existing item (e.g., color, category).
   Future<void> updateItem(String itemId, Map<String, dynamic> data) async {
     try {
       await _db.updateItem(itemId, data);
