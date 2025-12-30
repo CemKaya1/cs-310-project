@@ -12,7 +12,7 @@ class OutfitlyHomePage extends StatefulWidget {
 }
 
 class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
-  /// Firestore service for user-related database operations
+  //Firestore service for user-related database operations
   final FirestoreService _service = FirestoreService();
 
   @override
@@ -63,7 +63,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
           ),
         ),
 
-        / Profile icon navigates to the profile page
+        //Profile icon navigates to the profile page
         actions: [
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, "/profile"),
