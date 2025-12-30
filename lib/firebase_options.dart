@@ -15,7 +15,9 @@ import 'package:flutter/foundation.dart'
 /// );
 /// ```
 class DefaultFirebaseOptions {
+  /// Returns the specific [FirebaseOptions] for the platform currently running the app.
   static FirebaseOptions get currentPlatform {
+    // Web detection must come first as TargetPlatform doesn't distinguish Web-based OS.
     if (kIsWeb) {
       return web;
     }
@@ -40,6 +42,8 @@ class DefaultFirebaseOptions {
     }
   }
 
+  /// Configuration for Web. 
+  /// Note: API keys for Firebase are intended to be public-facing identifiers.
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyCLhYL5sapzkNjK-tyvf-XuAkT_YnfrOPY',
     appId: '1:709924201424:web:487eeff6edc622a8ce4fd5',
@@ -49,6 +53,7 @@ class DefaultFirebaseOptions {
     storageBucket: 'cs310-66b27.firebasestorage.app',
   );
 
+  /// Configuration for Android.
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCrZNOofHUDbIfptNFAWtusT2TTlZbQnII',
     appId: '1:709924201424:android:fac726cbc1c4e9c1ce4fd5',
@@ -57,6 +62,8 @@ class DefaultFirebaseOptions {
     storageBucket: 'cs310-66b27.firebasestorage.app',
   );
 
+  /// Configuration for iOS and macOS.
+  /// These platforms often share the same Firebase iOS app instance.
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD6tPZFgxTaK_gggCGC6JqvXAWufBXp70E',
     appId: '1:709924201424:ios:202d3a899118e801ce4fd5',
@@ -75,6 +82,7 @@ class DefaultFirebaseOptions {
     iosBundleId: 'com.example.cs310Project',
   );
 
+  /// Configuration for Windows (utilizes Web credentials).
   static const FirebaseOptions windows = FirebaseOptions(
     apiKey: 'AIzaSyCLhYL5sapzkNjK-tyvf-XuAkT_YnfrOPY',
     appId: '1:709924201424:web:5bf0a2fdeb3213f1ce4fd5',
