@@ -13,8 +13,11 @@ class ItemDetailPage extends StatefulWidget {
 }
 
 class _ItemDetailPageState extends State<ItemDetailPage> {
+  // UI State flags
   bool _isEditing = false;
   bool _saving = false;
+
+  // Controllers for editing item metadata
   late TextEditingController _nameController;
   late TextEditingController _categoryController;
   late TextEditingController _styleController;
@@ -24,9 +27,10 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Get the item passed from MyClosetPage
+    // Retrieve the ItemDoc object passed via Navigator arguments
     final item = ModalRoute.of(context)!.settings.arguments as ItemDoc;
-    
+
+    // Initialize controllers with existing item data
     _nameController = TextEditingController(text: item.name);
     _categoryController = TextEditingController(text: item.category);
     _styleController = TextEditingController(text: item.style);
@@ -36,6 +40,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
 
   @override
   void dispose() {
+    // Clean up controllers to prevent memory leaks
     _nameController.dispose();
     _categoryController.dispose();
     _styleController.dispose();
@@ -44,12 +49,14 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     super.dispose();
   }
 
+  /// Determines how to render the image based on its path prefix
   Widget _buildImage(String path) {
     if (path.startsWith('http')) {
       return Image.network(path, fit: BoxFit.contain);
     } else if (path.startsWith('lib/') || path.startsWith('assets/')) {
       return Image.asset(path, fit: BoxFit.contain);
     } else {
+      // Assumes local file path (e.g., from camera/gallery)
       return Image.file(File(path), fit: BoxFit.contain);
     }
   }
@@ -73,6 +80,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
           padding: const EdgeInsets.all(24.0),
           child: Column(
             children: [
+              // --- Image Preview Section ---
               Container(
                 height: 280,
                 width: double.infinity,
@@ -86,7 +94,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                 ),
               ),
               const SizedBox(height: 20),
-              
+              // --- Item Name (Toggle between Text and TextField) ---
               if (_isEditing)
                  TextField(
                   controller: _nameController,
@@ -109,6 +117,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                 ),
 
               const SizedBox(height: 30),
+              // --- Attribute Fields ---
               _buildDetailField(label: "Category", controller: _categoryController, theme: theme),
               const SizedBox(height: 16),
               _buildDetailField(label: "Style", controller: _styleController, theme: theme),
@@ -118,15 +127,17 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
               _buildDetailField(label: "Color", controller: _colorController, theme: theme),
               const SizedBox(height: 40),
 
+              // --- Action Buttons ---
               Row(
                 children: [
+                  // Edit / Save Toggle Button
                   Expanded(
                     child: OutlinedButton.icon(
                       onPressed: () async {
                         if (_saving) return;
                         if (_isEditing) {
                           setState(() => _saving = true);
-                          // Update Firestore
+                          // Sync changes to Firestore via Provider
                           await context.read<ClosetProvider>().updateItem(item.id, {
                             'name': _nameController.text,
                             'category': _categoryController.text,
@@ -147,12 +158,14 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                     ),
                   ),
                   const SizedBox(width: 16),
+
+                  // Delete Button
                   Expanded(
                     child: ElevatedButton.icon(
                       onPressed: () async {
                         if (_saving) return;
                         setState(() => _saving = true);
-                        // Confirm deletion
+                        // Confirm deletion with user
                         bool? confirm = await showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -182,10 +195,10 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
                         );
 
                         if (confirm == true) {
+                          // 1. Remove item reference from any saved outfits
                           await FirestoreService()
                               .removeItemFromOutfits(itemImagePath: item.imageUrl);
-                          // Note: If imagePath was stored in Firestore as 'imagePath', use it. 
-                          // The Seed service used 'imageUrl' for asset path.
+                          // 2. Delete the item itself
                           await context.read<ClosetProvider>().deleteItem(item.id); 
                           Navigator.of(context).pop();
                         } else {
@@ -206,6 +219,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
     );
   }
 
+  /// Helper to build a labeled row with a TextField
   Widget _buildDetailField({required String label, required TextEditingController controller, required ThemeData theme}) {
     final scheme = theme.colorScheme;
     return Container(
@@ -223,7 +237,7 @@ class _ItemDetailPageState extends State<ItemDetailPage> {
           Expanded(
             child: TextField(
               controller: controller,
-              enabled: _isEditing,
+              enabled: _isEditing, // Only interactable in edit mode
               style: TextStyle(color: scheme.onSurface),
               decoration: const InputDecoration(border: InputBorder.none),
             ),
