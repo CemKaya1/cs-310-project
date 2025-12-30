@@ -231,12 +231,12 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
             const SizedBox(height: 12),
 
-            // Action buttons: Edit/Save and Delete
+            //Action buttons: Edit/Save and Delete
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 
-                // Edit/Save button
+                //Edit/Save button
                 OutlinedButton.icon(
                   onPressed: isEditing
                       ? (_saving ? null : _saveChanges)
