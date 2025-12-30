@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/services/firestore_service.dart';
 
-//home page widget
+//Home page widget
 class OutfitlyHomePage extends StatefulWidget {
   const OutfitlyHomePage({super.key});
 
@@ -17,7 +17,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
   void initState() {
     super.initState();
 
-    //If the user doesn't have a document in Firestore, it creates one.
+    //If the user doesn't have a document in Firestore, it creates one
     _service.ensureUserDoc();
   }
 
