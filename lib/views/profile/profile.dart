@@ -133,7 +133,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Icon(Icons.nights_stay_outlined, color: scheme.onSurface),
                   const SizedBox(width: 12),
 
-                  // Dark mode label
+                  //Dark mode label
                   Expanded(
                     child: Text(
                       "Dark Mode",
@@ -159,7 +159,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ],
               ),
             ),
-             // Fills remaining space so the button stays at the bottom
+             //Fills remaining space so the button stays at the bottom
             const Spacer(),
 
             //Log out button
@@ -180,7 +180,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   if (!mounted) return;
 
-                  // Navigate back to the root(login screen)
+                  //Navigate back to the root(login screen)
                   Navigator.of(context)
                       .popUntil((route) => route.isFirst);
                 },
@@ -197,6 +197,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 }
-
-
-
