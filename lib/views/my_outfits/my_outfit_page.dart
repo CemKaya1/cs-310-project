@@ -35,12 +35,14 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
 
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
+          // Navigate to creator and wait for a result to refresh or notify
           final created = await Navigator.pushNamed(context, "/outfit_creator");
 
           if (created == true && mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Outfit saved successfully")),
             );
+            // Trigger rebuild if a new outfit was added
             setState(() {});
           }
         },
@@ -54,6 +56,7 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: StreamBuilder<List<Outfit>>(
+          // Listening to real-time updates from the OutfitsProvider
           stream: context.watch<OutfitsProvider>().outfitsStream,
           builder: (context, snapshot) {
             final outfits = snapshot.data ?? const <Outfit>[];
@@ -83,12 +86,14 @@ class _MyOutfitPageState extends State<MyOutfitPage> {
                 return OutfitItem(
                   outfit: outfit,
                   onTap: () async {
+                    // Pass the selected outfit to the detail view
                     final updated = await Navigator.pushNamed(
                       context,
                       "/outfit_detail",
                       arguments: outfit,
                     );
 
+                    // Refresh state if the detail view modified the outfit
                     if (updated == true && mounted) {
                       setState(() {});
                     }
