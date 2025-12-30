@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cs_310_project/services/firestore_service.dart';
 
-//Home page widget
+//Home page
+//Displays a welcome message and basic user information
 class OutfitlyHomePage extends StatefulWidget {
   const OutfitlyHomePage({super.key});
 
@@ -11,26 +12,28 @@ class OutfitlyHomePage extends StatefulWidget {
 }
 
 class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
+  /// Firestore service for user-related database operations
   final FirestoreService _service = FirestoreService();
 
   @override
   void initState() {
     super.initState();
 
-    //If the user doesn't have a document in Firestore, it creates one
+    //Ensures that the logged-in user has a document in Firestore
+    //If it does not exist, it is created automatically
     _service.ensureUserDoc();
   }
 
   @override
   Widget build(BuildContext context) {
-    //Theme colors
+    //Theme colors and text styles
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    //Get logged-in user
+    //Currently authenticated Firebase user
     final user = FirebaseAuth.instance.currentUser;
 
-    //If the user is not logged in
+    //If the user is not authenticated, show a fallback screen
     if (user == null) {
       return const Scaffold(
         body: Center(
@@ -38,14 +41,16 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
         ),
       );
     }
-    //A stream that listens to user documentation in Firestore in real time
+
+    //Stream that listens to the user's Firestore document in real time
     final userDocStream = _service.userDocStream();
 
     return Scaffold(
       backgroundColor: scheme.background,
-      //Top bar
+
+      //App Bar
       appBar: AppBar(
-        automaticallyImplyLeading: false, //no back button
+        automaticallyImplyLeading: false, // Removes back button
         backgroundColor: scheme.surface,
         elevation: 0,
         centerTitle: true,
@@ -58,7 +63,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
           ),
         ),
 
-        //Clicking the profile icon in the upper right corner takes you to the profile page
+        / Profile icon navigates to the profile page
         actions: [
           GestureDetector(
             onTap: () => Navigator.pushNamed(context, "/profile"),
@@ -68,7 +73,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                 radius: 18,
                 backgroundColor: scheme.primaryContainer,
 
-                //Profile picture (shows an icon if there is an error)
+                //Profile image (falls back to icon if loading fails)
                 child: Image.network(
                   "https://cdn-icons-png.flaticon.com/512/6325/6325109.png",
                   errorBuilder: (context, error, stackTrace) {
@@ -84,13 +89,14 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
         ],
       ),
 
-      //Page content
+      //Page Content
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text("Outfitly",
+            Text(
+              "Outfitly",
               style: textTheme.headlineLarge?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: scheme.onBackground,
@@ -100,7 +106,8 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
             const SizedBox(height: 8),
 
             //Welcome message
-            Text("Welcome Back!",
+            Text(
+              "Welcome Back!",
               style: textTheme.headlineSmall?.copyWith(
                 fontWeight: FontWeight.w600,
                 color: scheme.onBackground,
@@ -109,7 +116,7 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
             const SizedBox(height: 12),
 
-            //Explanatory text
+            //Short description of the app
             Text(
               "Organize your wardrobe and plan your perfect outfits",
               textAlign: TextAlign.center,
@@ -120,16 +127,16 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
 
             const SizedBox(height: 24),
 
-            //Firestore real-time data display
+            //Firestore Real-time Data
             StreamBuilder(
               stream: userDocStream,
               builder: (context, snapshot) {
-                //Veri henüz gelmediyse loading göster
+                //Show loading indicator while waiting for Firestore data
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 }
 
-                //If there is no data
+                //Fallback if no data is available
                 if (!snapshot.hasData || snapshot.data == null) {
                   return Text(
                     "Loading user...",
@@ -139,14 +146,18 @@ class _OutfitlyHomePageState extends State<OutfitlyHomePage> {
                   );
                 }
 
-                //Convert Firestore data to Map
+                //Extract Firestore document data
                 final raw = snapshot.data!.data();
                 final data = raw is Map<String, dynamic> ? raw : null;
 
+                //Email resolution priority:
+                //Firestore user document
+                //FirebaseAuth user email
+                //Fallback value
                 final email =
-                    (data?["email"] as String?) ?? //Firestore is checked first
-                    user.email ?? //If Firestore is null FirebaseAuth is checked
-                    "unknown"; //Fallback if FirebaseAuth is null
+                    (data?["email"] as String?) ??
+                    user.email ??
+                    "unknown";
 
                 return Text(
                   "Logged in as: $email",
