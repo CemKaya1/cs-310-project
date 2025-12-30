@@ -11,29 +11,29 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Global key for form validation logic
   final _formKey = GlobalKey<FormState>();
+  // Controllers to retrieve text from input fields
   final _emailCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
 
-  // --------------------------------------------
-  // RUNTIME USER LIST 
-  // --------------------------------------------
   final List<Map<String, String>> _users = [];
 
   @override
   void dispose() {
+    // Clean up controllers when the widget is removed from the tree
     _emailCtrl.dispose();
     _passwordCtrl.dispose();
     super.dispose();
   }
 
-  // --------------------------------------------
-  // EMAIL VALIDATION: en az "@" ve "." içermeli
-  // --------------------------------------------
+
+  /// Basic email validation logic
   bool _isValidEmail(String email) {
-    // Minimal kontrol: "@" içermeli
     return email.contains("@");
   }
+  
+  /// Displays a stylized dialog for validation errors
   void _showAlert(String message) {
     final scheme = Theme.of(context).colorScheme;
     showDialog(
@@ -61,10 +61,10 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  // --------------------------------------------
-  // LOGIN
-  // --------------------------------------------
+  // AUTHENTICATION LOGIC (LOGIN / REGISTER)
+  /// Triggers the login process via Provider
   Future<void> _login() async {
+    // 1. Validate form fields locally first
     if (!_formKey.currentState!.validate()) {
       _showAlert("Please fix the form errors before logging in.");
       return;
@@ -72,11 +72,12 @@ class _LoginPageState extends State<LoginPage> {
 
     final email = _emailCtrl.text.trim();
     final password = _passwordCtrl.text.trim();
-  // MODIFIED START: delegate authentication to LoginRegisterProvider (Firebase)
-  final provider = context.read<LoginRegisterProvider>();
-  final success = await provider.login(email, password);
-  // MODIFIED END
 
+    // 2. Call the provider to handle Firebase authentication
+    final provider = context.read<LoginRegisterProvider>();
+    final success = await provider.login(email, password);
+
+    // 3. Handle failure (Success navigation is usually handled by a listener or wrapper)
     if (!success) {
       final msg = provider.error ?? 'Login failed';
       ScaffoldMessenger.of(context).showSnackBar(
@@ -87,9 +88,8 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
-  // --------------------------------------------
-  // REGISTER
-  // --------------------------------------------
+
+  /// Triggers the registration process via Provider
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) {
       _showAlert("Please fix the form errors before registering.");
@@ -120,6 +120,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
 
+  // UI BUILD
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
@@ -161,9 +162,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       const SizedBox(height: 32),
 
-                      // -----------------------------------------
-                      // EMAIL FIELD
-                      // -----------------------------------------
+                      // --- EMAIL FIELD ---
                       Text(
                         "Email",
                         style: TextStyle(
@@ -206,9 +205,7 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 16),
 
-                      // -----------------------------------------
-                      // PASSWORD FIELD
-                      // -----------------------------------------
+                      // --- PASSWORD FIELD ---
                       Text(
                         "Password",
                         style: TextStyle(
@@ -251,10 +248,8 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 28),
 
-                      // -----------------------------------------
-                      // BUTTONS
-                      // -----------------------------------------
-                      // MODIFIED START: login/register buttons now observe provider's loading state
+                      // --- ACTION BUTTONS ---
+                      // Consumer rebuilds this specific part when provider.loading changes
                       Consumer<LoginRegisterProvider>(
                         builder: (context, provider, _) {
                           return Row(
@@ -305,7 +300,6 @@ class _LoginPageState extends State<LoginPage> {
                           );
                         },
                       )
-                      // MODIFIED END,
                     ],
                   ),
                 ),
