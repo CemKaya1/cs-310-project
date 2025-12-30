@@ -14,6 +14,7 @@ class OutfitDetailPage extends StatefulWidget {
 }
 
 class _OutfitDetailPageState extends State<OutfitDetailPage> {
+  
   //Whether the page is currently in edit mode
   bool isEditing = false;
 
@@ -41,6 +42,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
   @override
   void dispose() {
+    
     //Dispose the controller to free resources
     _nameCtrl.dispose();
     super.dispose();
@@ -53,6 +55,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
     final newName = _nameCtrl.text.trim();
 
     if (newName.isNotEmpty) {
+      
       // Update local outfit name
       setState(() => outfit.name = newName);
 
@@ -80,6 +83,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+    
     //Theme helpers
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -183,6 +187,7 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     margin: const EdgeInsets.only(bottom: 12),
                     child: Stack(
                       children: [
+                        
                         //Clothing item card
                         SizedBox(
                           width: double.infinity,
@@ -230,7 +235,8 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                // Edit / Save button
+                
+                // Edit/Save button
                 OutlinedButton.icon(
                   onPressed: isEditing
                       ? (_saving ? null : _saveChanges)
