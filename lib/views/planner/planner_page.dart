@@ -6,6 +6,7 @@ import 'package:cs_310_project/models/planner_entry_model.dart';
 import 'package:cs_310_project/views/planner/planner_provider.dart';
 import 'package:cs_310_project/views/my_outfits/outfits_provider.dart';
 
+//Planner page where users can assign outfits to calendar days
 class PlannerPage extends StatefulWidget {
   const PlannerPage({super.key});
 
@@ -16,14 +17,21 @@ class PlannerPage extends StatefulWidget {
 class _PlannerPageState extends State<PlannerPage> {
   @override
   Widget build(BuildContext context) {
+    //Weekday labels
     final days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+    //Theme references
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
 
-    final plannerProvider = Provider.of<PlannerProvider>(context, listen: false);
-
+    //Access planner provider without listening to rebuilds
+    final plannerProvider =
+        Provider.of<PlannerProvider>(context, listen: false);
+    
     return Scaffold(
       backgroundColor: scheme.background,
+
+      //App bar
       appBar: AppBar(
         automaticallyImplyLeading: false,
         centerTitle: true,
@@ -41,7 +49,7 @@ class _PlannerPageState extends State<PlannerPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
-            // === GÜN İSİMLERİ ===
+            //Weekday headers
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: days.map((d) {
@@ -61,10 +69,11 @@ class _PlannerPageState extends State<PlannerPage> {
 
             const SizedBox(height: 8),
 
-            // === FIREBASE GRID (Takvim) ===
+            //Calendar grid populated from Firestore
             StreamBuilder<List<PlannerEntry>>(
               stream: plannerProvider.plannerEntriesStream,
               builder: (context, snapshot) {
+                //Map planner entries by grid index
                 Map<int, PlannerEntry> filledSlots = {};
                 if (snapshot.hasData) {
                   for (var entry in snapshot.data!) {
@@ -80,11 +89,11 @@ class _PlannerPageState extends State<PlannerPage> {
                     mainAxisSpacing: 6,
                     crossAxisSpacing: 6,
                   ),
-                  itemCount: 28,
-                  itemBuilder: (context, index) {
+                  itemCount: 28, itemBuilder: (context, index) {
                     final entry = filledSlots[index];
 
                     return DragTarget<Outfit>(
+                      //Accept dragged outfit and assign it to the selected day
                       onAccept: (Outfit outfit) {
                         plannerProvider.assignOutfitToDay(index, outfit);
                       },
@@ -92,7 +101,8 @@ class _PlannerPageState extends State<PlannerPage> {
                         final bool isHovering = candidate.isNotEmpty;
 
                         return GestureDetector(
-                          onTap: () {
+                          //Tap to remove the assigned outfit
+                          onTap: () {gtf
                             if (entry != null) {
                               plannerProvider.removeOutfitFromDay(index);
                             }
@@ -106,17 +116,26 @@ class _PlannerPageState extends State<PlannerPage> {
                                 color: scheme.outlineVariant,
                               ),
                               borderRadius: BorderRadius.circular(10),
-                              image: entry != null && entry.outfitImagePath.isNotEmpty
+
+                              //Show outfit image if assigned
+                              image: entry != null &&
+                                      entry.outfitImagePath.isNotEmpty
                                   ? DecorationImage(
-                                      image: entry.outfitImagePath.startsWith('http')
-                                          ? NetworkImage(entry.outfitImagePath)
-                                          : AssetImage(entry.outfitImagePath) as ImageProvider,
+                                      image: entry.outfitImagePath
+                                              .startsWith('http')
+                                          ? NetworkImage(
+                                              entry.outfitImagePath)
+                                          : AssetImage(
+                                                  entry.outfitImagePath)
+                                              as ImageProvider,
                                       fit: BoxFit.cover,
                                     )
                                   : null,
                             ),
                             padding: const EdgeInsets.all(3),
-                            child: entry == null ? const SizedBox.shrink() : null,
+                            child: entry == null
+                                ? const SizedBox.shrink()
+                                : null,
                           ),
                         );
                       },
@@ -128,6 +147,7 @@ class _PlannerPageState extends State<PlannerPage> {
 
             const SizedBox(height: 20),
 
+            //Saved outfits section
             Text(
               "Saved Outfits",
               style: textTheme.titleLarge?.copyWith(
@@ -138,32 +158,38 @@ class _PlannerPageState extends State<PlannerPage> {
 
             const SizedBox(height: 10),
 
+            //List of saved outfits from Firestore
             StreamBuilder<List<Outfit>>(
               stream: context.watch<OutfitsProvider>().outfitsStream,
               builder: (context, snapshot) {
                 final outfits = snapshot.data ?? const <Outfit>[];
 
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
+                if (snapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator());
                 }
 
                 if (outfits.isEmpty) {
                   return Center(
                     child: Text(
                       'No outfits yet',
-                      style: textTheme.bodyMedium?.copyWith(color: scheme.onSurface),
+                      style: textTheme.bodyMedium
+                          ?.copyWith(color: scheme.onSurface),
                     ),
                   );
                 }
 
                 return ListView.builder(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics:
+                      const NeverScrollableScrollPhysics(),
                   itemCount: outfits.length,
                   itemBuilder: (context, index) {
                     final outfit = outfits[index];
                     return Padding(
-                      padding: const EdgeInsets.only(bottom: 10),
+                      padding:
+                          const EdgeInsets.only(bottom: 10),
                       child: OutfitItem(
                         outfit: outfit,
                         draggable: true,
