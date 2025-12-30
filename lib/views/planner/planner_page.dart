@@ -93,6 +93,7 @@ class _PlannerPageState extends State<PlannerPage> {
                     final entry = filledSlots[index];
 
                     return DragTarget<Outfit>(
+                      
                       //Accept dragged outfit and assign it to the selected day
                       onAccept: (Outfit outfit) {
                         plannerProvider.assignOutfitToDay(index, outfit);
@@ -102,7 +103,7 @@ class _PlannerPageState extends State<PlannerPage> {
 
                         return GestureDetector(
                           //Tap to remove the assigned outfit
-                          onTap: () {gtf
+                          onTap: () {
                             if (entry != null) {
                               plannerProvider.removeOutfitFromDay(index);
                             }
@@ -119,11 +120,9 @@ class _PlannerPageState extends State<PlannerPage> {
 
                               //Show outfit image if assigned
                               image: entry != null &&
-                                      entry.outfitImagePath.isNotEmpty
-                                  ? DecorationImage(
+                                      entry.outfitImagePath.isNotEmpty? DecorationImage(
                                       image: entry.outfitImagePath
-                                              .startsWith('http')
-                                          ? NetworkImage(
+                                              .startsWith('http')? NetworkImage(
                                               entry.outfitImagePath)
                                           : AssetImage(
                                                   entry.outfitImagePath)
