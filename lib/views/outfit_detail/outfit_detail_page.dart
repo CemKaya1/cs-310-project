@@ -258,17 +258,33 @@ class _OutfitDetailPageState extends State<OutfitDetailPage> {
                     final confirm = await showDialog<bool>(
                       context: context,
                       builder: (ctx) => AlertDialog(
+                        backgroundColor: scheme.surface,
+                        titleTextStyle: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        contentTextStyle: TextStyle(
+                          color: scheme.onSurface,
+                          fontSize: 16,
+                        ),
                         title: const Text("Delete Outfit"),
                         content: const Text(
                             "Are you sure you want to delete this outfit?"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, false),
-                            child: const Text("Cancel"),
+                            child: Text(
+                              "Cancel",
+                              style: TextStyle(color: scheme.primary),
+                            ),
                           ),
                           TextButton(
                             onPressed: () => Navigator.pop(ctx, true),
-                            child: const Text("Delete"),
+                            child: Text(
+                              "Delete",
+                              style: TextStyle(color: scheme.error),
+                            ),
                           ),
                         ],
                       ),
